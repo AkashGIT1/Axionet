@@ -11,7 +11,10 @@ const { createBetsRouter, resolveBets } = require('./routes/bets');
 const { createFundsRouter } = require('./routes/funds');
 const { createExchangeService } = require('./services/exchangeService');
 const createExchangeRouter = require('./routes/exchange');
-const { startExchangeScheduler } = require('./engine/exchangeCycle');
+const { startExchangeScheduler, startTradeScheduler } = require('./engine/exchangeCycle');
+const { computeSocialSentiment } = require('./engine/socialSentiment');
+const { buildCryptoMarketContext } = require('./engine/cryptoTrends');
+const { buildMarketScores } = require('./engine/agentBrain');
 
 dotenv.config();
 
@@ -82,6 +85,34 @@ app.get('/api/agents/:ticker', async (req, res) => {
   res.json(data);
 });
 
+// Social sentiment scores for active agents (drives trading UI)
+app.get('/api/sentiment', async (req, res) => {
+  try {
+    const { data: agents } = await supabase
+      .from('agents')
+      .select('ticker, price, wallet, status, style')
+      .in('status', ['active', 'dominant']);
+    const { data: posts } = await supabase
+      .from('social_posts')
+      .select('agent_ticker, content, reactions, event_type, event_data')
+      .order('created_at', { ascending: false })
+      .limit(120);
+    const live = agents || [];
+    const postsList = posts || [];
+    const socialScores = computeSocialSentiment(live, postsList);
+    const cryptoContext = await buildCryptoMarketContext(postsList);
+    const marketScores = buildMarketScores(live, socialScores, cryptoContext, postsList);
+    res.json({
+      scores: socialScores,
+      crypto: cryptoContext,
+      agents: marketScores,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get trades
 app.get('/api/trades', async (req, res) => {
   const limit = req.query.limit || 50;
@@ -98,7 +129,10 @@ app.get('/api/trades', async (req, res) => {
 app.get('/api/activity', async (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
   const now = Date.now();
-  if (activityCache && (now - activityCacheTime) < CACHE_TTL) return res.json(activityCache.slice(0, limit));
+  const skipCache = req.query.fresh === '1' || req.query.nocache === '1';
+  if (!skipCache && activityCache && (now - activityCacheTime) < CACHE_TTL) {
+    return res.json(activityCache.slice(0, limit));
+  }
   const { data, error } = await supabase
     .from('activity').select('*').order('created_at', { ascending: false }).limit(200);
   if (error) return res.status(500).json({ error });
@@ -167,8 +201,12 @@ app.get('/api/user/profile/:userId', async (req, res) => {
       .from('profiles')
       .select('*')
       .eq('id', req.params.userId)
-      .single();
-    if (error) return res.status(404).json({ error: 'Profile not found' });
+      .maybeSingle();
+    if (error) {
+      console.error('Profile fetch error:', error.message);
+      return res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+    if (!data) return res.status(404).json({ error: 'Profile not found' });
     res.json(data);
   } catch (err) {
     console.error('Profile fetch error:', err.message);
@@ -179,45 +217,45 @@ app.get('/api/user/profile/:userId', async (req, res) => {
 // Create or update user profile (e.g. for new Google sign-ins)
 app.post('/api/user/profile', async (req, res) => {
   try {
-    const { id, username, avatar_url, role } = req.body;
+    const { id, username, avatar_url, role, email } = req.body;
     if (!id) return res.status(400).json({ error: 'User id is required' });
+    if (!email) return res.status(400).json({ error: 'Email is required' });
 
-    const { data: existing } = await supabase
+    const baseUsername =
+      (username || email.split('@')[0] || 'user')
+        .replace(/[^a-zA-Z0-9_]/g, '')
+        .slice(0, 24) || 'user';
+
+    let finalUsername = baseUsername;
+    const { data: taken } = await supabase
       .from('profiles')
       .select('id')
-      .eq('id', id)
+      .eq('username', finalUsername)
+      .neq('id', id)
       .maybeSingle();
+
+    if (taken) {
+      finalUsername = `${baseUsername}_${id.slice(0, 6)}`;
+    }
 
     const payload = {
       id,
-      username: username || null,
+      username: finalUsername,
+      email,
       avatar_url: avatar_url || null,
       role: role || 'user',
       updated_at: new Date().toISOString(),
     };
 
-    if (existing) {
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(payload)
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) {
-        console.error('Profile update error:', error);
-        return res.status(500).json({ error: 'Failed to update profile' });
-      }
-      return res.json(data);
-    }
-
     const { data, error } = await supabase
       .from('profiles')
-      .insert({ ...payload, created_at: new Date().toISOString() })
+      .upsert(payload, { onConflict: 'id' })
       .select()
       .single();
+
     if (error) {
-      console.error('Profile create error:', error);
-      return res.status(500).json({ error: 'Failed to create profile' });
+      console.error('Profile upsert error:', error.message, error.details);
+      return res.status(500).json({ error: error.message || 'Failed to save profile' });
     }
     res.json(data);
   } catch (err) {
@@ -422,7 +460,10 @@ app.get('/api/health', async (req, res) => {
       timestamp: new Date().toISOString(),
       agents: agents?.length || 0,
       activeAgents: agents?.filter(a => a.status === 'active' || a.status === 'dominant').length || 0,
-      treasury: treasury || null
+      treasury: treasury || null,
+      exchangeEngine: process.env.EXCHANGE_ENGINE_ENABLED !== 'false',
+      tradeScheduler: process.env.EXCHANGE_TRADE_SCHEDULER !== 'false',
+      tradeIntervalMs: parseInt(process.env.EXCHANGE_TRADE_INTERVAL_MS, 10) || 45000,
     });
   } catch (err) {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -434,11 +475,40 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => console.log('Client disconnected:', socket.id));
 });
 
+function startMarketPulse(io, supabase) {
+  const ms = parseInt(process.env.EXCHANGE_PULSE_INTERVAL_MS, 10) || 60000;
+  const pulse = async () => {
+    try {
+      invalidateDataCaches();
+      const [{ data: agents }, { data: treasury }, { data: recentActivity }] = await Promise.all([
+        supabase.from('agents').select('*').order('price', { ascending: false }),
+        supabase.from('treasury').select('*').single(),
+        supabase.from('activity').select('*').order('created_at', { ascending: false }).limit(12),
+      ]);
+      io.emit('exchange-update', {
+        type: 'pulse',
+        agents: agents || [],
+        treasury: treasury || null,
+        recentActivity: recentActivity || [],
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error('[exchange] Market pulse error:', err.message);
+    }
+  };
+  console.log(`[exchange] Market pulse broadcast every ${ms / 1000}s`);
+  setInterval(pulse, ms);
+  setTimeout(pulse, 5000);
+}
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Axionet API running on port ${PORT}`);
+  console.log('[exchange] Starting schedulers (trades ~45s, full cycle ~10min)');
 
   startExchangeScheduler(supabase, exchange);
+  startTradeScheduler(supabase, exchange);
+  startMarketPulse(io, supabase);
 
   // Bet resolution scheduler
   // Runs every 5 minutes.

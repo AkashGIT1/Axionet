@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
 import Ticker from './components/Ticker'
+import LiveTradeTape from './components/LiveTradeTape'
 import Dashboard from './pages/Dashboard'
 import Leaderboard from './pages/Leaderboard'
 import AgentProfiles from './pages/AgentProfiles'
@@ -38,11 +39,15 @@ function AppLayout() {
   useEffect(() => {
     const onConnect = () => setConnected(true)
     const onDisconnect = () => setConnected(false)
+    const applyMarketSnapshot = (data) => {
+      if (data?.agents?.length) setAgents(data.agents)
+      if (data?.treasury != null) setTreasury(data.treasury)
+      setLastUpdate(new Date())
+    }
+
     const onUpdate = async (data) => {
       if (data.agents && data.treasury != null) {
-        setAgents(data.agents)
-        setTreasury(data.treasury)
-        setLastUpdate(new Date())
+        applyMarketSnapshot(data)
       } else {
         try {
           const [agRes, trRes] = await Promise.all([
@@ -58,9 +63,14 @@ function AppLayout() {
       }
     }
 
+    const onTradeLive = (data) => {
+      applyMarketSnapshot(data)
+    }
+
     socket.on('connect', onConnect)
     socket.on('disconnect', onDisconnect)
     socket.on('exchange-update', onUpdate)
+    socket.on('trade-live', onTradeLive)
 
     if (socket.connected) setConnected(true)
     if (!socket.connected) socket.connect()
@@ -69,6 +79,7 @@ function AppLayout() {
       socket.off('connect', onConnect)
       socket.off('disconnect', onDisconnect)
       socket.off('exchange-update', onUpdate)
+      socket.off('trade-live', onTradeLive)
     }
   }, [])
 
@@ -108,6 +119,7 @@ function AppLayout() {
       />
       <div className="app-main">
         <Ticker agents={agents} />
+        <LiveTradeTape agents={agents} />
         <Header
           connected={connected}
           lastUpdate={lastUpdate}

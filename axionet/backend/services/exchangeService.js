@@ -30,6 +30,31 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
     if (typeof onDataChange === 'function') onDataChange()
   }
 
+  async function emitTradeLive(trade, meta) {
+    const [{ data: agents }, { data: treasury }, { data: recentActivity }] = await Promise.all([
+      supabase.from('agents').select('*').order('price', { ascending: false }),
+      supabase.from('treasury').select('*').single(),
+      supabase.from('activity').select('*').order('created_at', { ascending: false }).limit(12),
+    ])
+    const payload = {
+      ...meta,
+      trade,
+      agents: agents || [],
+      treasury: treasury || null,
+      recentActivity: recentActivity || [],
+      timestamp: new Date().toISOString(),
+    }
+    io.emit('trade-live', payload)
+    io.emit('exchange-update', {
+      type: meta.side === 'sell' ? 'sell' : 'trade',
+      agents: agents || [],
+      treasury,
+      recentActivity: recentActivity || [],
+      ...meta,
+    })
+    bumpCache()
+  }
+
   async function taskResult({ ticker, success, earned, reason }) {
     const { data: agent } = await supabase.from('agents').select('*').eq('ticker', ticker).single()
     if (!agent) throw new Error('Agent not found')
@@ -95,14 +120,14 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
       updated_at: new Date(),
     }).eq('ticker', buyer)
 
-    await supabase.from('trades').insert({
+    const { data: trade } = await supabase.from('trades').insert({
       buyer_ticker: buyer,
       seller_ticker: target,
       shares,
       price_at_trade: price,
       total_cost: cost,
       fee,
-    })
+    }).select().single()
 
     await supabase.from('activity').insert({
       agent_ticker: buyer,
@@ -122,9 +147,15 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
     await supabase.from('agents').update({ price: newTargetPrice }).eq('ticker', target)
     await supabase.from('price_history').insert({ agent_ticker: target, price: newTargetPrice })
 
-    io.emit('exchange-update', { type: 'trade', buyer, target, shares, price: newTargetPrice })
-    bumpCache()
-    return { success: true, newWallet, sharesOwned }
+    await emitTradeLive(trade, {
+      side: 'buy',
+      buyer,
+      target,
+      shares,
+      price: newTargetPrice,
+      reason: reason || '',
+    })
+    return { success: true, newWallet, sharesOwned, price: newTargetPrice, trade }
   }
 
   async function sellShares({ seller, asset, shares, reason }) {
@@ -156,14 +187,14 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
       updated_at: new Date(),
     }).eq('ticker', seller)
 
-    await supabase.from('trades').insert({
+    const { data: trade } = await supabase.from('trades').insert({
       buyer_ticker: asset,
       seller_ticker: seller,
       shares,
       price_at_trade: currentPrice,
       total_cost: proceeds,
       fee,
-    })
+    }).select().single()
 
     await supabase.from('activity').insert({
       agent_ticker: seller,
@@ -183,9 +214,16 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
     await supabase.from('agents').update({ price: newAssetPrice }).eq('ticker', asset)
     await supabase.from('price_history').insert({ agent_ticker: asset, price: newAssetPrice })
 
-    io.emit('exchange-update', { type: 'sell', seller, asset, shares, price: currentPrice, profit })
-    bumpCache()
-    return { success: true, newWallet, profit, sharesOwned }
+    await emitTradeLive(trade, {
+      side: 'sell',
+      seller,
+      asset,
+      shares,
+      price: newAssetPrice,
+      profit,
+      reason: reason || '',
+    })
+    return { success: true, newWallet, profit, sharesOwned, price: newAssetPrice, trade }
   }
 
   async function priceUpdate({ ticker }) {

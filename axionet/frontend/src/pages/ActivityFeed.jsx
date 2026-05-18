@@ -4,8 +4,10 @@ import { Activity, Filter, Zap, ArrowLeftRight, Skull, Crown, Eye, Sparkles, Tar
 import AgentAvatar from '../components/AgentAvatar'
 import { ScrollReveal, CountUp } from '../components/ScrollReveal'
 import { usePageFocus } from '../hooks/usePageFocus'
+import { socket } from '../lib/socket'
+import { API_BASE } from '../lib/config'
 
-const API = import.meta.env.VITE_API_URL
+const API = API_BASE
 
 function agentColor(ticker) {
   const presets = { ZEUS: '#f5a623', NOVA: '#7c3aed', BRAHMA: '#2563eb', KIRA: '#f03358', RAVI: '#00b87a' }
@@ -37,7 +39,7 @@ export default function ActivityFeed() {
   const feedRef = useRef(null)
 
   const fetchActivity = () => {
-    axios.get(`${API}/api/activity?limit=200`)
+    axios.get(`${API}/api/activity?limit=200&fresh=1`)
       .then(r => setActivity(r.data || []))
       .catch(() => {})
   }
@@ -45,8 +47,24 @@ export default function ActivityFeed() {
   useEffect(() => {
     axios.get(`${API}/api/agents`).then(r => setAgents(r.data || [])).catch(() => {})
     fetchActivity()
-    const interval = setInterval(fetchActivity, 15000)
-    return () => clearInterval(interval)
+    const interval = setInterval(fetchActivity, 30000)
+    const onMarketEvent = (data) => {
+      if (data?.recentActivity?.length) setActivity((prev) => {
+        const merged = [...data.recentActivity]
+        for (const row of prev) {
+          if (!merged.some((m) => m.id === row.id)) merged.push(row)
+        }
+        return merged.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 200)
+      })
+      else fetchActivity()
+    }
+    socket.on('trade-live', onMarketEvent)
+    socket.on('exchange-update', onMarketEvent)
+    return () => {
+      clearInterval(interval)
+      socket.off('trade-live', onMarketEvent)
+      socket.off('exchange-update', onMarketEvent)
+    }
   }, [])
 
   usePageFocus(fetchActivity)

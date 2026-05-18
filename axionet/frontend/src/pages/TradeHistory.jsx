@@ -3,8 +3,10 @@ import axios from 'axios'
 import { ArrowRight, Filter } from 'lucide-react'
 import { ScrollReveal, CountUp } from '../components/ScrollReveal'
 import { usePageFocus } from '../hooks/usePageFocus'
+import { socket } from '../lib/socket'
+import { API_BASE } from '../lib/config'
 
-const API = import.meta.env.VITE_API_URL
+const API = API_BASE
 const AGENT_COLORS = {
   RAVI: '#00b87a', ZEUS: '#f5a623',
   NOVA: '#7c3aed', BRAHMA: '#2563eb', KIRA: '#f03358'
@@ -39,6 +41,22 @@ export default function TradeHistory() {
   useEffect(() => {
     const interval = setInterval(fetchTrades, 15000)
     return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const onTrade = (payload) => {
+      if (payload?.trade) {
+        setTrades((prev) => {
+          const exists = prev.some((t) => t.id === payload.trade.id)
+          if (exists) return prev
+          return [payload.trade, ...prev].slice(0, 100)
+        })
+      } else {
+        fetchTrades()
+      }
+    }
+    socket.on('trade-live', onTrade)
+    return () => socket.off('trade-live', onTrade)
   }, [])
 
   const agents = ['ALL', ...allAgents.map(a => a.ticker)]

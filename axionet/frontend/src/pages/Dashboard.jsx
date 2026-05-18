@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, DollarSign, ArrowLeftRight, Zap, Users, Alert
 import AgentAvatar from '../components/AgentAvatar'
 import { ScrollReveal, CountUp } from '../components/ScrollReveal'
 import { API_BASE } from '../lib/config'
+import { socket } from '../lib/socket'
 
 const API = API_BASE
 
@@ -26,6 +27,7 @@ export default function Dashboard({ agents: liveAgents, treasury: liveTreasury }
   const [agents, setAgents] = useState(liveAgents || [])
   const [treasury, setTreasury] = useState(liveTreasury || null)
   const [activity, setActivity] = useState([])
+  const [activityUpdatedAt, setActivityUpdatedAt] = useState(null)
   const [stats, setStats] = useState(null)
   const [priceHistory, setPriceHistory] = useState([])
   const [holdingsModalAgent, setHoldingsModalAgent] = useState(null)
@@ -50,12 +52,13 @@ export default function Dashboard({ agents: liveAgents, treasury: liveTreasury }
       const [ag, tr, ac, st] = await Promise.all([
         axios.get(`${API}/api/agents`).catch(() => ({ data: [] })),
         axios.get(`${API}/api/treasury`).catch(() => ({ data: null })),
-        axios.get(`${API}/api/activity?limit=8`).catch(() => ({ data: [] })),
+        axios.get(`${API}/api/activity?limit=8&fresh=1`).catch(() => ({ data: [] })),
         axios.get(`${API}/api/stats`).catch(() => ({ data: null }))
       ])
       setAgents(ag.data || [])
       setTreasury(tr.data)
       setActivity(ac.data || [])
+      setActivityUpdatedAt(new Date())
       setStats(st.data)
       fetchPriceHistory(ag.data)
     } catch (err) {
@@ -77,11 +80,38 @@ export default function Dashboard({ agents: liveAgents, treasury: liveTreasury }
   }, [])
 
   useEffect(() => {
-    const activityInterval = setInterval(() => {
-      axios.get(`${API}/api/activity?limit=8`).then(r => setActivity(r.data || [])).catch(() => {})
-    }, 15000)
-    return () => clearInterval(activityInterval)
+    const applyActivity = (items) => {
+      if (items?.length) {
+        setActivity(items.slice(0, 8))
+        setActivityUpdatedAt(new Date())
+      }
+    }
+    const refreshActivity = () => {
+      axios.get(`${API}/api/activity?limit=8&fresh=1`)
+        .then(r => {
+          setActivity(r.data || [])
+          setActivityUpdatedAt(new Date())
+        })
+        .catch(() => {})
+    }
+    const onMarketEvent = (data) => {
+      if (data?.recentActivity?.length) applyActivity(data.recentActivity)
+      else refreshActivity()
+    }
+    const fullRefresh = () => fetchAll()
+    const pollInterval = setInterval(fullRefresh, 30000)
+    socket.on('trade-live', onMarketEvent)
+    socket.on('exchange-update', onMarketEvent)
+    return () => {
+      clearInterval(pollInterval)
+      socket.off('trade-live', onMarketEvent)
+      socket.off('exchange-update', onMarketEvent)
+    }
   }, [])
+
+  useEffect(() => {
+    if (liveAgents?.length) fetchPriceHistory(liveAgents)
+  }, [liveAgents])
 
   useEffect(() => {
     if (liveAgents?.length) setAgents(liveAgents)
@@ -402,11 +432,19 @@ export default function Dashboard({ agents: liveAgents, treasury: liveTreasury }
 <div className="card">
         <div className="card-header">
           <div className="card-title">Recent Activity</div>
-          <span className="badge badge-red">STREAMING</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {activityUpdatedAt && (
+              <span style={{ fontSize: '0.62rem', color: 'var(--text3)' }}>
+                Updated {activityUpdatedAt.toLocaleTimeString()}
+              </span>
+            )}
+            <span className="badge badge-red">LIVE</span>
+          </div>
         </div>
         {activity.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text3)', fontSize: '0.8rem' }}>
-            No activity yet. The exchange engine will generate events every 10 minutes.
+            No activity yet. Trades run about every 45s when at least 2 agents are approved (active).
+            Restart the backend if you do not see [exchange] logs in the terminal.
           </div>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>

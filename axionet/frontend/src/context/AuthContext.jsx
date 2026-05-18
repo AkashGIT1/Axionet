@@ -54,6 +54,7 @@ export function AuthProvider({ children }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             id: user.id,
+            email: user.email,
             username: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
             avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
             role: 'user',

@@ -3,6 +3,8 @@
  */
 
 const { getDefaults } = require('../routes/settings')
+const { runInterAgentTrading } = require('./interAgentTrading')
+const { buildCryptoMarketContext } = require('./cryptoTrends')
 
 const TASK_REASONS = [
   'market analysis complete',
@@ -58,8 +60,19 @@ async function evaluateDuePredictions(supabase, exchange) {
   }
 }
 
+async function loadRecentPosts(supabase) {
+  const { data } = await supabase
+    .from('social_posts')
+    .select('agent_ticker, content, reactions, event_type, event_data, created_at')
+    .order('created_at', { ascending: false })
+    .limit(150)
+  return data || []
+}
+
 async function runAgentTasks(supabase, exchange, agents) {
   const live = agents.filter(isLive)
+  const posts = await loadRecentPosts(supabase)
+  const cryptoContext = await buildCryptoMarketContext(posts)
 
   for (const agent of live) {
     const cfg = exchange.personalityConfig(agent.style)
@@ -91,7 +104,7 @@ async function runAgentTasks(supabase, exchange, agents) {
           const direction = Math.random() > 0.5 ? 'up' : 'down'
           await exchange.storePrediction({
             ticker: agent.ticker,
-            prediction_text: `${target.ticker} ${direction} next cycle`,
+            prediction_text: `${target.ticker} ${direction} as $${cryptoContext.topSymbol} trends (${cryptoContext.summary})`,
             target_ticker: target.ticker,
             predicted_direction: direction,
             predicted_percentage: 5 + Math.floor(Math.random() * 10),
@@ -118,48 +131,15 @@ async function runPriceUpdates(exchange, agents) {
   }
 }
 
-async function runAutoTrading(exchange, agents) {
-  const live = agents.filter(isLive).sort((a, b) => parseFloat(b.price) - parseFloat(a.price))
-  if (live.length < 2) return
-
-  const leader = live[0]
-
-  for (const agent of live) {
-    if (agent.ticker === leader.ticker) continue
-    const wallet = parseFloat(agent.wallet)
-    if (wallet <= 2) continue
-
-    if (Math.random() < 0.35) {
-      const shares = 1
-      try {
-        await exchange.buyShares({
-          buyer: agent.ticker,
-          target: leader.ticker,
-          shares,
-          reason: 'auto-invest in market leader',
-        })
-      } catch {
-        // insufficient balance — skip
-      }
-    }
-
-    const owned = agent.shares_owned || {}
-    const entries = Object.entries(owned)
-    if (entries.length && Math.random() < 0.2) {
-      const [asset, pos] = entries[Math.floor(Math.random() * entries.length)]
-      const sellQty = Math.min(pos.shares || 1, 1)
-      try {
-        await exchange.sellShares({
-          seller: agent.ticker,
-          asset,
-          shares: sellQty,
-          reason: 'portfolio rebalance',
-        })
-      } catch {
-        // skip
-      }
-    }
+async function runSocialDrivenTrading(supabase, exchange) {
+  const stagger = parseInt(process.env.EXCHANGE_TRADE_STAGGER_MS, 10) || 350
+  const result = await runInterAgentTrading(supabase, exchange, { staggerMs: stagger })
+  if (result.trades > 0) {
+    console.log(`[exchange] Inter-agent trades: ${result.trades} (social-trend driven)`)
+  } else if (result.message !== 'need 2+ active agents') {
+    console.log('[exchange] Trading round — no trades this tick')
   }
+  return result
 }
 
 async function runBankruptcyChecks(exchange, agents, settings) {
@@ -198,7 +178,7 @@ async function runExchangeCycle(supabase, exchange) {
   await runPriceUpdates(exchange, agents)
   agents = await reloadAgents(supabase)
 
-  await runAutoTrading(exchange, agents)
+  await runSocialDrivenTrading(supabase, exchange)
   agents = await reloadAgents(supabase)
 
   await runBankruptcyChecks(exchange, agents, settings)
@@ -253,4 +233,28 @@ function startExchangeScheduler(supabase, exchange) {
   setTimeout(tick, bootDelay)
 }
 
-module.exports = { runExchangeCycle, startExchangeScheduler }
+function startTradeScheduler(supabase, exchange) {
+  const enabled = process.env.EXCHANGE_TRADE_SCHEDULER !== 'false'
+  if (!enabled) return
+
+  let running = false
+  const defaultMs = parseInt(process.env.EXCHANGE_TRADE_INTERVAL_MS, 10) || 45 * 1000
+
+  const tick = async () => {
+    if (running) return
+    running = true
+    try {
+      await runSocialDrivenTrading(supabase, exchange)
+    } catch (err) {
+      console.error('[exchange] Trade tick error:', err.message)
+    } finally {
+      running = false
+    }
+  }
+
+  console.log(`[exchange] Live trade scheduler every ${defaultMs / 1000}s`)
+  setInterval(tick, defaultMs)
+  setTimeout(tick, 8000)
+}
+
+module.exports = { runExchangeCycle, startExchangeScheduler, startTradeScheduler, runSocialDrivenTrading }

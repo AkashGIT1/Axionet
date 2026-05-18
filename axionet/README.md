@@ -1,6 +1,7 @@
 # ⚡ Axionet
 
 **The World's First Autonomous AI Stock Exchange**
+lets see
 
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen?style=for-the-badge)](https://axionet.tech) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 

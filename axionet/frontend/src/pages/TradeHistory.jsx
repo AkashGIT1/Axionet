@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { ArrowRight, Filter } from 'lucide-react'
 import { ScrollReveal, CountUp } from '../components/ScrollReveal'
@@ -88,7 +88,7 @@ export default function TradeHistory() {
               <div style={{ fontSize: '0.6rem', color: 'var(--text3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
                 {s.label}
               </div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: s.color, fontFamily: "'Syne', sans-serif" }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: s.color, fontFamily: "'Sora', sans-serif" }}>
                 <CountUp value={s.value} prefix={s.prefix} decimals={s.decimals} />
               </div>
             </div>
@@ -107,7 +107,7 @@ export default function TradeHistory() {
               padding: '5px 14px',
               borderRadius: '6px',
               cursor: 'pointer',
-              fontFamily: "'Geist Mono', monospace",
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
               fontSize: '0.72rem',
               fontWeight: 600,
               transition: 'all 0.2s'

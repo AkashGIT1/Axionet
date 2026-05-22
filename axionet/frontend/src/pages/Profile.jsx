@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
@@ -13,7 +13,7 @@ const API = import.meta.env.VITE_API_URL
 const USDC_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
 const HOUSE_WALLET = import.meta.env.VITE_HOUSE_WALLET || '0x518E341C981D9C64E4c8292fF6C3E8F5055ba256'
 
-// USDC transfer ABI — only transfer function
+// USDC transfer ABI â€” only transfer function
 const USDC_ABI = [{
   name: 'transfer',
   type: 'function',
@@ -42,7 +42,7 @@ function timeAgo(d) {
   if (days < 30) return `${days}d ago`
   return new Date(d).toLocaleDateString()
 }
-// ── Fund Modal ────────────────────────────────────────────────────────────────
+// â”€â”€ Fund Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FundModal({ agent, type, onClose, onSuccess, userId }) {
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
@@ -65,7 +65,7 @@ function FundModal({ agent, type, onClose, onSuccess, userId }) {
   const { isLoading: isConfirming, isSuccess: isConfirmed, data: receipt } =
     useWaitForTransactionReceipt({ hash: pendingTxHash })
 
-  // After USDC tx confirmed — record add fund
+  // After USDC tx confirmed â€” record add fund
   useEffect(() => {
     if (!isConfirmed || !receipt || !isAdd || !loading) return
     async function recordAdd() {
@@ -158,14 +158,14 @@ function FundModal({ agent, type, onClose, onSuccess, userId }) {
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '1rem' }}>{title}</div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text3)', fontSize: '1.2rem' }}>✕</button>
+          <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: '1rem' }}>{title}</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text3)', fontSize: '1.2rem' }}>âœ•</button>
         </div>
 
         {/* Success State */}
         {successData ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ fontSize: '2rem', marginBottom: 10 }}>🎉</div>
+            <div style={{ fontSize: '2rem', marginBottom: 10 }}>ðŸŽ‰</div>
             <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 6 }}>
               {successData.type === 'add' ? 'Funds Added!' : successData.type === 'remove' ? 'Funds Removed!' : 'Rewards Withdrawn!'}
             </div>
@@ -208,7 +208,7 @@ function FundModal({ agent, type, onClose, onSuccess, userId }) {
             {/* Network warning */}
             {!isOnBase && isAdd && (
               <div style={{ background: 'rgba(255,100,0,0.1)', border: '1px solid rgba(255,100,0,0.3)', borderRadius: 8, padding: '8px 12px', marginBottom: 14, fontSize: '0.72rem', color: '#ff8844' }}>
-                ⚠️ Please switch to Base network to send USDC
+                âš ï¸ Please switch to Base network to send USDC
               </div>
             )}
 
@@ -216,7 +216,7 @@ function FundModal({ agent, type, onClose, onSuccess, userId }) {
             {isAdd && (
               <div style={{ background: 'rgba(0,200,100,0.08)', border: '1px solid rgba(0,200,100,0.2)', borderRadius: 8, padding: '10px 14px', marginBottom: 14, fontSize: '0.72rem' }}>
                 <div style={{ fontWeight: 700, marginBottom: 2 }}>USDC will be sent from your wallet</div>
-                <div style={{ color: 'var(--text3)' }}>Network: Base • Token: USDC • Min: $1</div>
+                <div style={{ color: 'var(--text3)' }}>Network: Base â€¢ Token: USDC â€¢ Min: $1</div>
               </div>
             )}
             {isReward && (
@@ -225,7 +225,7 @@ function FundModal({ agent, type, onClose, onSuccess, userId }) {
                 <div style={{ color: 'var(--text3)' }}>$100 in-game earned = $5 USDC</div>
                 {amount && parseFloat(amount) >= 1 && (
                   <div style={{ marginTop: 6, fontWeight: 700, color: 'var(--green)' }}>
-                    ${parseFloat(amount).toFixed(2)} → {usdcOut} USDC
+                    ${parseFloat(amount).toFixed(2)} â†’ {usdcOut} USDC
                   </div>
                 )}
               </div>
@@ -233,7 +233,7 @@ function FundModal({ agent, type, onClose, onSuccess, userId }) {
 
             {/* Amount input */}
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: '0.72rem', color: 'var(--text3)', display: 'block', marginBottom: 4 }}>Amount (USDC) — min $1</label>
+              <label style={{ fontSize: '0.72rem', color: 'var(--text3)', display: 'block', marginBottom: 4 }}>Amount (USDC) â€” min $1</label>
               <input
                 className="register-input"
                 type="number" min="1" step="1"
@@ -282,7 +282,7 @@ function FundModal({ agent, type, onClose, onSuccess, userId }) {
   )
 }
 
-// ── Withdraw All Rewards Modal ─────────────────────────────────────────────
+// â”€â”€ Withdraw All Rewards Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function WithdrawAllModal({ agents, onClose, userId }) {
   const { address, isConnected } = useAccount()
   const [selectedAgent, setSelectedAgent] = useState(agents[0]?.ticker || '')
@@ -321,13 +321,13 @@ function WithdrawAllModal({ agents, onClose, userId }) {
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
       <div className="card" style={{ width: '100%', maxWidth: 420 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '1rem' }}>Withdraw Rewards</div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text3)', fontSize: '1.2rem' }}>✕</button>
+          <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: '1rem' }}>Withdraw Rewards</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text3)', fontSize: '1.2rem' }}>âœ•</button>
         </div>
 
         {success ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ fontSize: '2rem', marginBottom: 10 }}>🎉</div>
+            <div style={{ fontSize: '2rem', marginBottom: 10 }}>ðŸŽ‰</div>
             <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 6 }}>Withdrawal Successful!</div>
             <div style={{ fontSize: '0.78rem', color: 'var(--text3)', marginBottom: 10 }}>{success.usdcPayout} USDC sent to your wallet</div>
             {success.txHash && (
@@ -354,7 +354,7 @@ function WithdrawAllModal({ agents, onClose, userId }) {
               <span style={{ fontWeight: 700 }}>Rate: </span>
               <span style={{ color: 'var(--text3)' }}>$100 in-game = $5 USDC</span>
               {amount && parseFloat(amount) >= 1 && (
-                <span style={{ marginLeft: 8, fontWeight: 700, color: 'var(--green)' }}>→ {usdcOut} USDC</span>
+                <span style={{ marginLeft: 8, fontWeight: 700, color: 'var(--green)' }}>â†’ {usdcOut} USDC</span>
               )}
             </div>
 
@@ -364,7 +364,7 @@ function WithdrawAllModal({ agents, onClose, userId }) {
                 <select className="register-input" value={selectedAgent} onChange={e => setSelectedAgent(e.target.value)}
                   style={{ width: '100%', padding: '8px 12px', fontSize: '0.78rem' }}>
                   {agents.map(a => (
-                    <option key={a.ticker} value={a.ticker}>${a.ticker} — ${parseFloat(a.total_earned || 0).toFixed(2)} earned</option>
+                    <option key={a.ticker} value={a.ticker}>${a.ticker} â€” ${parseFloat(a.total_earned || 0).toFixed(2)} earned</option>
                   ))}
                 </select>
               </div>
@@ -376,7 +376,7 @@ function WithdrawAllModal({ agents, onClose, userId }) {
             </div>
 
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: '0.72rem', color: 'var(--text3)', display: 'block', marginBottom: 4 }}>Amount ($) — min $1</label>
+              <label style={{ fontSize: '0.72rem', color: 'var(--text3)', display: 'block', marginBottom: 4 }}>Amount ($) â€” min $1</label>
               <input className="register-input" type="number" min="1" step="1" value={amount}
                 onChange={e => setAmount(e.target.value)} placeholder="Enter amount"
                 style={{ width: '100%', padding: '8px 12px', fontSize: '0.85rem' }} />
@@ -402,7 +402,7 @@ function WithdrawAllModal({ agents, onClose, userId }) {
   )
 }
 
-// ── Main Profile ──────────────────────────────────────────────────────────────
+// â”€â”€ Main Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth()
   const navigate = useNavigate()
@@ -471,7 +471,7 @@ export default function Profile() {
       {/* Profile Header */}
       <div className="card" style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <div style={{ width: 56, height: 56, borderRadius: 14, background: 'var(--green)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '1.2rem', flexShrink: 0 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 14, background: 'var(--green)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: '1.2rem', flexShrink: 0 }}>
             {displayName.charAt(0).toUpperCase()}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -486,7 +486,7 @@ export default function Profile() {
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '1.2rem' }}>{displayName}</span>
+                <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: '1.2rem' }}>{displayName}</span>
                 <button onClick={() => { setNewUsername(displayName); setEditingUsername(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text3)', padding: 4 }}>
                   <Edit2 size={13} />
                 </button>
@@ -516,7 +516,7 @@ export default function Profile() {
           <div className="stat-icon"><TrendingUp size={16} /></div>
           <div className="stat-label">Total Earned</div>
           <div className="stat-number" style={{ fontSize: '0.95rem' }}>${totalEarned.toFixed(2)}</div>
-          <div style={{ fontSize: '0.6rem', color: 'var(--text3)', marginBottom: 6 }}>≈ {totalUsdcValue} USDC real</div>
+          <div style={{ fontSize: '0.6rem', color: 'var(--text3)', marginBottom: 6 }}>â‰ˆ {totalUsdcValue} USDC real</div>
           {totalEarned >= 1 && (
             <button
               className="btn btn-primary"
@@ -532,7 +532,7 @@ export default function Profile() {
         <div className="card stat-card">
           <div className="stat-icon"><Trophy size={16} /></div>
           <div className="stat-label">Best Agent</div>
-          <div className="stat-number" style={{ fontSize: '0.95rem' }}>{best ? `$${best.ticker}` : '—'}</div>
+          <div className="stat-number" style={{ fontSize: '0.95rem' }}>{best ? `$${best.ticker}` : 'â€”'}</div>
           {best && <div style={{ fontSize: '0.65rem', color: 'var(--text3)' }}>${parseFloat(best.price).toFixed(4)}</div>}
         </div>
 
@@ -689,10 +689,10 @@ export default function Profile() {
             )}
             {fundHistory.map((f, i) => {
               const cfg = {
-                add: { label: 'Added', color: 'var(--green)', icon: '💰', sign: '+' },
-                remove: { label: 'Removed', color: '#ff4444', icon: '💸', sign: '-' },
-                reward_withdraw: { label: 'Reward', color: '#f0a500', icon: '🏆', sign: '-' },
-              }[f.type] || { label: f.type, color: 'var(--text3)', icon: '•', sign: '' }
+                add: { label: 'Added', color: 'var(--green)', icon: 'ðŸ’°', sign: '+' },
+                remove: { label: 'Removed', color: '#ff4444', icon: 'ðŸ’¸', sign: '-' },
+                reward_withdraw: { label: 'Reward', color: '#f0a500', icon: 'ðŸ†', sign: '-' },
+              }[f.type] || { label: f.type, color: 'var(--text3)', icon: 'â€¢', sign: '' }
               return (
                 <div key={f.id || i} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: '0.72rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
@@ -724,7 +724,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Activity Timeline — full width */}
+      {/* Activity Timeline â€” full width */}
       <div className="card" style={{ marginTop: 20 }}>
         <div className="card-header">
           <div className="card-title">Activity Timeline</div>

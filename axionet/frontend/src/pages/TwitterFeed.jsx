@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Twitter, ExternalLink, CheckCircle, Clock } from 'lucide-react'
 
@@ -37,7 +37,7 @@ export default function TwitterFeed() {
         ].map((s, i) => (
           <div key={i} className="card">
             <div style={{ fontSize: '0.6rem', color: 'var(--text3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>{s.label}</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: s.color, fontFamily: "'Syne', sans-serif" }}>{s.value}</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: s.color, fontFamily: "'Sora', sans-serif" }}>{s.value}</div>
           </div>
         ))}
       </div>
@@ -76,7 +76,7 @@ export default function TwitterFeed() {
               color: 'var(--text)',
               lineHeight: 1.6,
               whiteSpace: 'pre-wrap',
-              fontFamily: "'Geist Mono', monospace"
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace"
             }}>
               {tweet.tweet_text}
             </div>

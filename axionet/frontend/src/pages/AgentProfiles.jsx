@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+﻿import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { TrendingUp, TrendingDown, Zap, Wallet, Target } from 'lucide-react'
@@ -116,9 +116,9 @@ export default function AgentProfiles() {
               border: `1px solid ${selected === a.ticker ? (AGENT_COLORS[a.ticker] || agentColor(a.ticker)) : 'var(--text3)'}`,
               boxShadow: selected === a.ticker ? `0 0 12px ${(AGENT_COLORS[a.ticker] || agentColor(a.ticker))}55` : 'none',
               padding: '8px 20px', borderRadius: '8px', cursor: 'pointer',
-              fontFamily: "'Geist Mono', monospace", fontWeight: 700, fontSize: '0.8rem', transition: 'all 0.2s'
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontWeight: 700, fontSize: '0.8rem', transition: 'all 0.2s'
             }}>
-              {a.ticker}{a.status === 'bankrupt' && ' 💀'}
+              {a.ticker}{a.status === 'bankrupt' && ' ðŸ’€'}
             </button>
           ))}
         </div>
@@ -138,7 +138,7 @@ export default function AgentProfiles() {
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                   <AgentAvatar ticker={agent.ticker} avatarUrl={agent.avatar_url} size="xl" />
                   <div>
-                    <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)' }}>
+                    <div style={{ fontFamily: "'Sora', sans-serif", fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)' }}>
                       {agent.full_name}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text3)', marginTop: '2px' }}>{agent.style}</div>
@@ -146,13 +146,13 @@ export default function AgentProfiles() {
                 </div>
                 <div className="profile-hero-price" style={{ textAlign: 'right' }}>
                   <div style={{
-                    fontFamily: "'Syne', sans-serif", fontSize: '2.2rem', fontWeight: 800,
+                    fontFamily: "'Sora', sans-serif", fontSize: '2.2rem', fontWeight: 800,
                     color: parseFloat(agent.price) >= 1 ? (AGENT_COLORS[agent.ticker] || agentColor(agent.ticker)) : 'var(--red)'
                   }}>
                     ${parseFloat(agent.price).toFixed(4)}
                   </div>
                   <div style={{ fontSize: '0.85rem', fontWeight: 600, color: parseFloat(agent.price) >= 1 ? 'var(--green)' : 'var(--red)' }}>
-                    {parseFloat(agent.price) >= 1 ? '▲' : '▼'} {Math.abs((parseFloat(agent.price) - 1) * 100).toFixed(2)}% since launch
+                    {parseFloat(agent.price) >= 1 ? 'â–²' : 'â–¼'} {Math.abs((parseFloat(agent.price) - 1) * 100).toFixed(2)}% since launch
                   </div>
                   <span className={`badge ${agent.status === 'bankrupt' ? 'badge-red' : 'badge-green'}`} style={{ marginTop: '8px', display: 'inline-block' }}>
                     {agent.status}
@@ -184,7 +184,7 @@ export default function AgentProfiles() {
                       <div style={{ fontSize: '0.52rem', color: 'var(--text3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
                         {s.label}
                       </div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 800, color: s.color, fontFamily: "'Syne', sans-serif", marginBottom: '2px' }}>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 800, color: s.color, fontFamily: "'Sora', sans-serif", marginBottom: '2px' }}>
                         <CountUp
                           value={parseFloat(s.value.toString().replace(/[^0-9.]/g, '')) || 0}
                           prefix={s.value.toString().startsWith('$') ? '$' : ''}
@@ -247,7 +247,7 @@ export default function AgentProfiles() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {[
-                    { label: 'Success Rate',      value: agent.ticker === 'BRAHMA' ? 'N/A — Investor Only' : `${successRate}%`, pct: successRate,                                        color: successRate >= 70 ? 'var(--green)' : successRate >= 50 ? 'var(--gold)' : 'var(--red)' },
+                    { label: 'Success Rate',      value: agent.ticker === 'BRAHMA' ? 'N/A â€” Investor Only' : `${successRate}%`, pct: successRate,                                        color: successRate >= 70 ? 'var(--green)' : successRate >= 50 ? 'var(--gold)' : 'var(--red)' },
                     { label: 'Wallet Health',      value: `$${parseFloat(agent.wallet).toFixed(2)} / $10.00`,                    pct: Math.min(parseFloat(agent.wallet) * 10, 100),      color: parseFloat(agent.wallet) < 1 ? 'var(--red)' : 'var(--green)' },
                     { label: 'Earnings Progress',  value: `$${parseFloat(agent.total_earned).toFixed(2)} earned`,                pct: Math.min(parseFloat(agent.total_earned) * 5, 100), color: 'var(--blue)' },
                   ].map((m, i) => (

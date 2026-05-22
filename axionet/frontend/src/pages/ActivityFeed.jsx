@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+﻿import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { Activity, Filter, Zap, ArrowLeftRight, Skull, Crown, Eye, Sparkles, Target, CheckCircle, TrendingUp } from 'lucide-react'
 import AgentAvatar from '../components/AgentAvatar'
@@ -110,7 +110,7 @@ export default function ActivityFeed() {
                 <div style={{ fontSize: '0.6rem', color: 'var(--text3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
                   {s.label}
                 </div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: s.color, fontFamily: "'Syne', sans-serif", marginBottom: '4px' }}>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: s.color, fontFamily: "'Sora', sans-serif", marginBottom: '4px' }}>
                   <CountUp value={s.value} decimals={0} />
                 </div>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text3)' }}>{s.sub}</div>
@@ -132,7 +132,7 @@ export default function ActivityFeed() {
               color: filter === a ? '#fff' : 'var(--text2)',
               border: `1px solid ${filter === a ? (agentColor(a) || 'var(--text)') : 'var(--border)'}`,
               padding: '4px 12px', borderRadius: '6px', cursor: 'pointer',
-              fontFamily: "'Geist Mono', monospace", fontSize: '0.7rem', fontWeight: 600
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.7rem', fontWeight: 600
             }}>{a}</button>
           ))}
           <div style={{ width: '1px', height: '20px', background: 'var(--border)' }} />
@@ -142,7 +142,7 @@ export default function ActivityFeed() {
               color: typeFilter === t ? '#fff' : 'var(--text2)',
               border: `1px solid ${typeFilter === t ? 'var(--text)' : 'var(--border)'}`,
               padding: '4px 12px', borderRadius: '6px', cursor: 'pointer',
-              fontFamily: "'Geist Mono', monospace", fontSize: '0.7rem', fontWeight: 600
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.7rem', fontWeight: 600
             }}>{t === 'prediction_result' ? 'RESULTS' : t.toUpperCase()}</button>
           ))}
           <span style={{ fontSize: '0.7rem', color: 'var(--text3)', marginLeft: 'auto' }}>

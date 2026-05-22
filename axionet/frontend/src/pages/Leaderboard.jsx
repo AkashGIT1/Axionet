@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { TrendingUp, TrendingDown, X } from 'lucide-react'
 import AgentAvatar from '../components/AgentAvatar'
@@ -44,7 +44,7 @@ export default function Leaderboard() {
     if (agent.status === 'bankrupt') return <span className="badge badge-red">BANKRUPT</span>
     if (rank === 0) return <span className="badge badge-gold">LEADER</span>
     if (parseFloat(agent.price) > avgPrice * 1.5) return <span className="badge badge-green">DOMINANT</span>
-    if (parseFloat(agent.wallet) < 1) return <span className="badge" style={{ background: '#fff8ed', color: '#f5a623' }}>AT RISK</span>
+    if (parseFloat(agent.wallet) < 1) return <span className="badge badge-gold">AT RISK</span>
     return <span className="badge badge-gray">ACTIVE</span>
   }
 
@@ -55,9 +55,9 @@ export default function Leaderboard() {
 
   const podiumOrder = [1, 0, 2]
   const podiumMeta = [
-    { metal: '#ffd700', glow: '#fff5b3', numColor: '#ffd700', height: 160, emoji: '🥇', delay: 0.15 },
-    { metal: '#c0c0c0', glow: '#e8e8e8', numColor: '#c0c0c0', height: 125, emoji: '🥈', delay: 0 },
-    { metal: '#cd7f32', glow: '#e8a862', numColor: '#cd7f32', height: 100, emoji: '🥉', delay: 0.3 },
+    { metal: '#ffd700', glow: '#fff5b3', numColor: '#ffd700', height: 160, emoji: 'ðŸ¥‡', delay: 0.15 },
+    { metal: '#c0c0c0', glow: '#e8e8e8', numColor: '#c0c0c0', height: 125, emoji: 'ðŸ¥ˆ', delay: 0 },
+    { metal: '#cd7f32', glow: '#e8a862', numColor: '#cd7f32', height: 100, emoji: 'ðŸ¥‰', delay: 0.3 },
   ]
 
   return (
@@ -112,11 +112,11 @@ export default function Leaderboard() {
         }
         @keyframes podiumRise { to { transform: translateY(0); opacity: 1; } }
         .podium-num {
-          font-family: 'Syne', sans-serif; font-weight: 900; font-size: 2.4rem; opacity: 0.25;
+          font-family: 'Sora', sans-serif; font-weight: 900; font-size: 2.4rem; opacity: 0.25;
           position: absolute; top: 8px; left: 50%; transform: translateX(-50%); line-height: 1;
         }
         .podium-info { position: relative; z-index: 1; text-align: center; padding: 12px 8px; }
-        .podium-ticker { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px; }
+        .podium-ticker { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px; }
         .podium-price { font-weight: 700; font-size: 0.82rem; margin-bottom: 2px; }
         .podium-pct { font-size: 0.68rem; font-weight: 600; margin-bottom: 2px; }
         .podium-sr { font-size: 0.6rem; color: rgba(255,255,255,0.4); }
@@ -133,7 +133,7 @@ export default function Leaderboard() {
 
       <div className="page-header">
         <div className="page-title">Live Leaderboard</div>
-        <div className="page-subtitle">Agents ranked by current price — updates every 10 minutes</div>
+        <div className="page-subtitle">Agents ranked by current price â€” updates every 10 minutes</div>
       </div>
 
       <ScrollReveal delay={0}>
@@ -164,7 +164,7 @@ export default function Leaderboard() {
                     <div className="podium-ticker">{a.ticker}</div>
                     <div className="podium-price" style={{ color: up ? '#00b87a' : '#f03358' }}>${price.toFixed(4)}</div>
                     <div className="podium-pct" style={{ color: up ? '#00b87a' : '#f03358' }}>
-                      {up ? '▲' : '▼'} {Math.abs(pct).toFixed(2)}%
+                      {up ? 'â–²' : 'â–¼'} {Math.abs(pct).toFixed(2)}%
                     </div>
                     <div className="podium-sr">{successRate(a)}% success</div>
                   </div>
@@ -331,7 +331,7 @@ export default function Leaderboard() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>
-                {holdingsModalAgent.ticker} — Holdings
+                {holdingsModalAgent.ticker} â€” Holdings
               </span>
               <button
                 type="button"
@@ -358,7 +358,7 @@ export default function Leaderboard() {
                     const avg = o?.avg_buy_price != null ? parseFloat(o.avg_buy_price).toFixed(4) : null
                     return (
                       <div key={ticker} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
-                        {ticker} — {shares} share{shares !== 1 ? 's' : ''}{avg != null ? ` @ $${avg}` : ''}
+                        {ticker} â€” {shares} share{shares !== 1 ? 's' : ''}{avg != null ? ` @ $${avg}` : ''}
                       </div>
                     )
                   })

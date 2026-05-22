@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { DollarSign, TrendingUp, Percent, Landmark } from 'lucide-react'
@@ -69,7 +69,7 @@ export default function Treasury() {
             <div key={i} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <div style={{ fontSize: '0.55rem', color: 'var(--text3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>{s.label}</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: s.color, fontFamily: "'Syne', sans-serif" }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: s.color, fontFamily: "'Sora', sans-serif" }}>
                   <CountUp value={s.value} prefix={s.prefix} decimals={s.decimals} suffix={s.suffix || ''} />
                 </div>
               </div>

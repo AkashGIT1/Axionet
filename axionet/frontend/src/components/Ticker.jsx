@@ -31,18 +31,19 @@ export default function Ticker({ agents: liveAgents }) {
 
   return (
     <div style={{
-      background: '#0d1117',
-      borderBottom: '1px solid #1e2730',
-      height: '36px',
+      background: 'linear-gradient(90deg, #050811 0%, #0d1424 50%, #050811 100%)',
+      borderBottom: '1px solid rgba(148, 163, 184, 0.08)',
+      height: '38px',
       overflow: 'hidden',
       display: 'flex',
-      alignItems: 'center'
+      alignItems: 'center',
+      position: 'relative'
     }}>
       <div style={{
         display: 'flex',
         animation: 'ticker-scroll 40s linear infinite',
         whiteSpace: 'nowrap',
-        gap: '48px',
+        gap: '52px',
         padding: '0 24px'
       }}>
         {[...items, ...items].map((item, i) => (
@@ -50,33 +51,36 @@ export default function Ticker({ agents: liveAgents }) {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            fontFamily: "'Geist Mono', monospace",
-            fontSize: '0.72rem'
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: '0.72rem',
+            fontWeight: 500
           }}>
             {item.type === 'agent' ? (
               <>
                 <AgentAvatar ticker={item.ticker} avatarUrl={item.avatarUrl} size="xs" style={{ border: 'none' }} />
-                <span style={{ color: '#4a8fa8', fontWeight: 600 }}>{item.ticker}</span>
-                <span style={{ color: '#ffffff' }}>${item.price}</span>
+                <span style={{ color: '#a78bfa', fontWeight: 700, letterSpacing: '0.3px' }}>{item.ticker}</span>
+                <span style={{ color: '#ffffff', fontWeight: 600 }}>${item.price}</span>
                 <span style={{
-                  color: parseFloat(item.change) >= 0 ? '#00b87a' : '#f03358',
-                  fontWeight: 600
+                  color: parseFloat(item.change) >= 0 ? '#34d399' : '#f87171',
+                  fontWeight: 700
                 }}>
                   {parseFloat(item.change) >= 0 ? '▲' : '▼'} {Math.abs(item.change)}%
                 </span>
                 {item.status === 'bankrupt' && (
                   <span style={{
-                    fontSize: '0.6rem',
-                    background: '#f03358',
+                    fontSize: '0.58rem',
+                    background: 'linear-gradient(180deg, #dc2626, #b91c1c)',
                     color: 'white',
-                    padding: '1px 5px',
-                    borderRadius: '3px'
+                    padding: '2px 7px',
+                    borderRadius: '999px',
+                    fontWeight: 700,
+                    letterSpacing: '0.5px'
                   }}>BANKRUPT</span>
                 )}
-                <span style={{ color: '#1e3040' }}>|</span>
+                <span style={{ color: '#1f2742' }}>|</span>
               </>
             ) : (
-              <span style={{ color: '#2a4a5a' }}>{item.label}</span>
+              <span style={{ color: '#475569', letterSpacing: '0.5px', fontWeight: 600 }}>{item.label}</span>
             )}
           </div>
         ))}

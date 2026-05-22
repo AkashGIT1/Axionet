@@ -138,52 +138,58 @@ export default function Dashboard({ agents: liveAgents, treasury: liveTreasury }
             value: `$${parseFloat(treasury?.total_fees || 0).toFixed(2)}`,
             sub: '+2% per trade',
             icon: DollarSign,
-            color: '#00b87a',
-            bg: '#edfaf4'
+            color: '#34d399',
+            bg: 'rgba(16, 185, 129, 0.12)',
+            ring: 'rgba(16, 185, 129, 0.28)'
           },
           {
             label: 'Total Trades',
             value: treasury?.total_trades || 0,
             sub: 'Agent vs Agent',
             icon: ArrowLeftRight,
-            color: '#2563eb',
-            bg: '#eff4ff'
+            color: '#22d3ee',
+            bg: 'rgba(34, 211, 238, 0.12)',
+            ring: 'rgba(34, 211, 238, 0.28)'
           },
           {
             label: 'Tasks Attempted',
             value: treasury?.total_tasks || 0,
             sub: 'Earning tasks',
             icon: Zap,
-            color: '#f5a623',
-            bg: '#fff8ed'
+            color: '#fbbf24',
+            bg: 'rgba(245, 158, 11, 0.12)',
+            ring: 'rgba(245, 158, 11, 0.28)'
           },
           {
             label: 'Active Agents',
             value: agents.filter(a => a.status === 'active').length,
             sub: `${agents.filter(a => a.status === 'bankrupt').length} bankrupt`,
             icon: Users,
-            color: '#7c3aed',
-            bg: '#f5f0ff'
+            color: '#a78bfa',
+            bg: 'rgba(139, 92, 246, 0.14)',
+            ring: 'rgba(139, 92, 246, 0.32)'
           }
-        ].map((kpi, i) => (
-          <div key={i} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                {kpi.label}
+        ].map((kpi, i) => {
+          const valueStr = typeof kpi.value === 'string' ? kpi.value : String(kpi.value)
+          // Step the stat-number font down for long values so the prefix never gets clipped
+          const len = valueStr.length
+          const fit = len > 14 ? 'xxs' : len > 11 ? 'xs' : len > 8 ? 'sm' : len > 6 ? 'md' : undefined
+          return (
+            <div key={i} className="card kpi-card">
+              <div className="kpi-icon" style={{ background: kpi.bg, boxShadow: `0 0 0 1px ${kpi.ring}, 0 0 20px -4px ${kpi.bg}` }}>
+                <kpi.icon size={18} color={kpi.color} />
               </div>
-              <div className="stat-number" style={{ color: kpi.color, marginBottom: '4px' }}>
-              <CountUp value={typeof kpi.value === 'string' ? kpi.value.replace(/[^0-9.]/g, '') : kpi.value}
-                prefix={typeof kpi.value === 'string' && kpi.value.startsWith('$') ? '$' : ''}
-                decimals={typeof kpi.value === 'string' && kpi.value.includes('.') ? 2 : 0}
-              />
+              <div className="kpi-label">{kpi.label}</div>
+              <div className="stat-number kpi-value" data-fit={fit} title={valueStr} style={{ color: kpi.color }}>
+                <CountUp value={typeof kpi.value === 'string' ? kpi.value.replace(/[^0-9.]/g, '') : kpi.value}
+                  prefix={typeof kpi.value === 'string' && kpi.value.startsWith('$') ? '$' : ''}
+                  decimals={typeof kpi.value === 'string' && kpi.value.includes('.') ? 2 : 0}
+                />
+              </div>
+              <div className="kpi-sub">{kpi.sub}</div>
             </div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text3)' }}>{kpi.sub}</div>
-            </div>
-            <div style={{ background: kpi.bg, padding: '10px', borderRadius: '10px' }}>
-              <kpi.icon size={18} color={kpi.color} />
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
       </ScrollReveal>
 
@@ -198,11 +204,13 @@ export default function Dashboard({ agents: liveAgents, treasury: liveTreasury }
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={priceHistory}>
-              <XAxis dataKey="cycle" tick={{ fontSize: 10, fill: '#8896a8' }} label={{ value: 'Cycle', position: 'insideBottom', fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10, fill: '#8896a8' }} domain={['auto', 'auto']} />
+              <XAxis dataKey="cycle" tick={{ fontSize: 10, fill: '#64748b' }} label={{ value: 'Cycle', position: 'insideBottom', fontSize: 10, fill: '#64748b' }} />
+              <YAxis tick={{ fontSize: 10, fill: '#64748b' }} domain={['auto', 'auto']} />
               <Tooltip
-                contentStyle={{ background: '#0d1117', border: '1px solid #1e2730', borderRadius: '8px', fontSize: '0.72rem' }}
-                labelStyle={{ color: '#8896a8' }}
+                contentStyle={{ background: '#0d1424', border: '1px solid rgba(167,139,250,0.22)', borderRadius: '12px', fontSize: '0.72rem', color: '#f1f5f9', boxShadow: '0 16px 40px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(167,139,250,0.08)', fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}
+                labelStyle={{ color: '#a78bfa', fontWeight: 600 }}
+                itemStyle={{ color: '#ffffff' }}
+                cursor={{ stroke: 'rgba(167,139,250,0.25)', strokeWidth: 1 }}
               />
               {agents.map(a => (
                 <Line
@@ -230,53 +238,62 @@ export default function Dashboard({ agents: liveAgents, treasury: liveTreasury }
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {leader && (
             <div className="card" style={{
-              background: 'linear-gradient(135deg, #0d1117 0%, #1a2a1a 100%)',
-              border: '1px solid #00b87a33'
+              background: 'linear-gradient(135deg, #0d1424 0%, #1a1340 50%, #0a1f3a 100%)',
+              border: '1px solid rgba(167, 139, 250, 0.22)',
+              boxShadow: '0 16px 40px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(167,139,250,0.08)',
+              color: '#ffffff',
+              position: 'relative',
+              overflow: 'hidden'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'radial-gradient(420px 220px at 100% 0%, rgba(139, 92, 246, 0.25), transparent 60%), radial-gradient(360px 200px at 0% 100%, rgba(34, 211, 238, 0.14), transparent 60%)',
+                pointerEvents: 'none'
+              }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
                 <div>
-                  <div style={{ fontSize: '0.6rem', color: '#00b87a', letterSpacing: '2px', marginBottom: '6px' }}>
-                    👑 CURRENT LEADER
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.6rem', color: '#a78bfa', letterSpacing: '2.2px', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase' }}>
+                    Current Leader
                   </div>
-                  <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.8rem', fontWeight: 800, color: '#ffffff' }}>
+                  <div style={{ fontFamily: "'Sora', sans-serif", fontSize: '1.9rem', fontWeight: 800, letterSpacing: '-0.025em', lineHeight: 1, background: 'linear-gradient(135deg, #ffffff 0%, #c4b5fd 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     {leader.ticker}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#4a6070', marginBottom: '8px' }}>{leader.full_name}</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#00b87a' }}>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: '10px', marginTop: '4px', fontWeight: 500 }}>{leader.full_name}</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '1.25rem', fontWeight: 700, color: '#34d399' }}>
                     ${parseFloat(leader.price).toFixed(4)}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#00b87a' }}>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.7rem', color: '#34d399', marginTop: '2px', fontWeight: 600 }}>
                     ▲ +{((parseFloat(leader.price) - 1) * 100).toFixed(2)}% since launch
                   </div>
                 </div>
-                <Crown size={32} color="#00b87a" style={{ opacity: 0.3 }} />
+                <Crown size={34} color="#a78bfa" style={{ opacity: 0.7, filter: 'drop-shadow(0 4px 16px rgba(139, 92, 246, 0.6))' }} />
               </div>
-              <div style={{ display: 'flex', gap: '16px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #1e3020' }}>
+              <div style={{ display: 'flex', gap: '20px', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
                 <div>
-                  <div style={{ fontSize: '0.6rem', color: '#3a5040' }}>TASKS WON</div>
-                  <div style={{ fontSize: '0.85rem', color: '#00b87a', fontWeight: 600 }}>{leader.tasks_completed}</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.58rem', color: '#64748b', letterSpacing: '1.2px', fontWeight: 600 }}>TASKS WON</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.92rem', color: '#34d399', fontWeight: 700, marginTop: '2px' }}>{leader.tasks_completed}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.6rem', color: '#3a5040' }}>TASKS LOST</div>
-                  <div style={{ fontSize: '0.85rem', color: '#f03358', fontWeight: 600 }}>{leader.tasks_failed}</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.58rem', color: '#64748b', letterSpacing: '1.2px', fontWeight: 600 }}>TASKS LOST</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.92rem', color: '#f87171', fontWeight: 700, marginTop: '2px' }}>{leader.tasks_failed}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.6rem', color: '#3a5040' }}>WALLET</div>
-                  <div style={{ fontSize: '0.85rem', color: '#ffffff', fontWeight: 600 }}>${parseFloat(leader.wallet).toFixed(2)}</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.58rem', color: '#64748b', letterSpacing: '1.2px', fontWeight: 600 }}>WALLET</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.92rem', color: '#ffffff', fontWeight: 700, marginTop: '2px' }}>${parseFloat(leader.wallet).toFixed(2)}</div>
                 </div>
               </div>
             </div>
           )}
 
           {riskAgent && parseFloat(riskAgent.wallet) < 3 && (
-            <div className="card" style={{ background: '#fff8f0', border: '1px solid #ffd4a8' }}>
+            <div className="card" style={{ background: 'var(--gold-bg)', border: '1px solid var(--gold-border)' }}>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <AlertTriangle size={20} color="#f5a623" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <AlertTriangle size={20} color="var(--gold)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#c47010', marginBottom: '4px' }}>
-                    ⚠ BANKRUPTCY WARNING
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '0.7rem', fontWeight: 700, color: 'var(--gold-2)', marginBottom: '4px', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                    Bankruptcy Warning
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#8a5010' }}>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--gold-2)', lineHeight: 1.55 }}>
                     <strong>{riskAgent.ticker}</strong> has only ${parseFloat(riskAgent.wallet).toFixed(2)} left in wallet.
                     Bankruptcy triggers at $0.10.
                   </div>
@@ -458,13 +475,15 @@ export default function Dashboard({ agents: liveAgents, treasury: liveTreasury }
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{
-                  background: (AGENT_COLORS[item.agent_ticker] || agentColor(item.agent_ticker || '')) + '20',
+                  background: (AGENT_COLORS[item.agent_ticker] || agentColor(item.agent_ticker || '')) + '18',
                   color: AGENT_COLORS[item.agent_ticker] || agentColor(item.agent_ticker || ''),
-                  padding: '3px 8px',
-                  borderRadius: '4px',
+                  padding: '4px 9px',
+                  borderRadius: '999px',
                   fontSize: '0.65rem',
                   fontWeight: 700,
-                  fontFamily: "'Geist Mono', monospace"
+                  letterSpacing: '0.3px',
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  border: '1px solid ' + ((AGENT_COLORS[item.agent_ticker] || agentColor(item.agent_ticker || '')) + '40')
                 }}>
                   {item.agent_ticker}
                 </div>

@@ -1,4 +1,4 @@
-const PRESETS = { RAVI: '#00b87a', ZEUS: '#f5a623', NOVA: '#7c3aed', BRAHMA: '#2563eb', KIRA: '#f03358' }
+﻿const PRESETS = { RAVI: '#00b87a', ZEUS: '#f5a623', NOVA: '#7c3aed', BRAHMA: '#2563eb', KIRA: '#f03358' }
 
 function getColor(ticker) {
   if (!ticker) return '#666'
@@ -37,7 +37,7 @@ export default function AgentAvatar({ ticker, avatarUrl, size = 'md', style: ext
       ...baseStyle,
       background: color,
       color: '#fff',
-      fontFamily: "'Syne', sans-serif",
+      fontFamily: "'Sora', sans-serif",
       fontWeight: 800,
       fontSize,
     }}>

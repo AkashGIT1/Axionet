@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import { UserPlus, Zap, CheckCircle, AlertCircle, Loader, LogIn, Upload, ExternalLink } from 'lucide-react'
@@ -23,11 +23,11 @@ const USDC_ABI = [{
 }]
 
 const PERSONALITIES = [
-  { value: 'careful and analytical', label: 'Careful & Analytical', emoji: '🧠', desc: 'High success rate, steady earnings' },
-  { value: 'aggressive risk-taker', label: 'Aggressive Risk-Taker', emoji: '🔥', desc: 'Volatile but high potential returns' },
-  { value: 'creative and unpredictable', label: 'Creative & Unpredictable', emoji: '🎲', desc: 'Wildcards with surprise wins' },
-  { value: 'fast executor', label: 'Fast Executor', emoji: '⚡', desc: 'Runs 2x tasks per cycle' },
-  { value: 'pure investor', label: 'Pure Investor', emoji: '💰', desc: 'No tasks — trades only' },
+  { value: 'careful and analytical', label: 'Careful & Analytical', emoji: 'ðŸ§ ', desc: 'High success rate, steady earnings' },
+  { value: 'aggressive risk-taker', label: 'Aggressive Risk-Taker', emoji: 'ðŸ”¥', desc: 'Volatile but high potential returns' },
+  { value: 'creative and unpredictable', label: 'Creative & Unpredictable', emoji: 'ðŸŽ²', desc: 'Wildcards with surprise wins' },
+  { value: 'fast executor', label: 'Fast Executor', emoji: 'âš¡', desc: 'Runs 2x tasks per cycle' },
+  { value: 'pure investor', label: 'Pure Investor', emoji: 'ðŸ’°', desc: 'No tasks â€” trades only' },
 ]
 
 export default function Register() {
@@ -169,15 +169,15 @@ export default function Register() {
               <div style={{ margin: '12px 0 20px' }}>
                 <CheckCircle size={48} color="var(--gold)" />
               </div>
-              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.6rem', fontWeight: 800, marginBottom: 4 }}>
+              <div style={{ fontFamily: "'Sora', sans-serif", fontSize: '1.6rem', fontWeight: 800, marginBottom: 4 }}>
                 {success.full_name}
               </div>
               <div className="badge badge-gold" style={{ display: 'inline-block', fontSize: '0.85rem', padding: '4px 16px', marginBottom: 16 }}>
-                ${success.ticker} — Awaiting Approval
+                ${success.ticker} â€” Awaiting Approval
               </div>
               <div style={{ background: 'var(--gold-bg)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
                 <div style={{ fontSize: '0.78rem', color: '#7c6a0a', lineHeight: 1.7 }}>
-                  ✅ $10 USDC transaction confirmed. Your agent is pending agent approval.
+                  âœ… $10 USDC transaction confirmed. Your agent is pending agent approval.
                   Once approved it will join the next exchange cycle.
                   If rejected, your $10 USDC will be refunded to your wallet.
                 </div>
@@ -225,7 +225,7 @@ export default function Register() {
         <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <LogIn size={32} color="var(--green)" style={{ marginBottom: 12 }} />
-            <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '1.1rem', marginBottom: 6 }}>
+            <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: '1.1rem', marginBottom: 6 }}>
               Account Required
             </div>
             <div style={{ fontSize: '0.78rem', color: 'var(--text3)', marginBottom: 20, lineHeight: 1.6 }}>
@@ -271,7 +271,7 @@ export default function Register() {
                     style={{ fontSize: '0.7rem', padding: '6px 14px' }}>
                     {avatarFile ? 'Change Image' : 'Upload Image'}
                   </button>
-                  <div className="register-hint" style={{ marginTop: 4 }}>JPG, PNG, WebP, GIF — max 2MB</div>
+                  <div className="register-hint" style={{ marginTop: 4 }}>JPG, PNG, WebP, GIF â€” max 2MB</div>
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
                   onChange={handleAvatarSelect} style={{ display: 'none' }} />
@@ -282,7 +282,7 @@ export default function Register() {
               <label className="register-label">Agent Name *</label>
               <input className="register-input" type="text" placeholder="e.g. PHOENIX"
                 value={form.name} onChange={e => updateField('name', e.target.value)} maxLength={12} />
-              <div className="register-hint">{form.name.length}/12 — uppercase, alphanumeric only</div>
+              <div className="register-hint">{form.name.length}/12 â€” uppercase, alphanumeric only</div>
             </div>
 
             <div className="register-field">
@@ -299,7 +299,7 @@ export default function Register() {
               </div>
               {tickerStatus === 'taken' && <div className="register-hint" style={{ color: 'var(--red)' }}>Ticker ${form.ticker} is already taken</div>}
               {tickerStatus === 'available' && <div className="register-hint" style={{ color: 'var(--green)' }}>${form.ticker} is available!</div>}
-              {!tickerStatus && <div className="register-hint">{form.ticker.length}/6 — unique identifier for your agent</div>}
+              {!tickerStatus && <div className="register-hint">{form.ticker.length}/6 â€” unique identifier for your agent</div>}
             </div>
 
             <div className="register-field">
@@ -355,7 +355,7 @@ export default function Register() {
 
             {isConnected && !isOnBase && (
               <div style={{ background: 'rgba(255,100,0,0.1)', border: '1px solid rgba(255,100,0,0.3)', borderRadius: 8, padding: '8px 12px', fontSize: '0.72rem', color: '#ff8844', marginBottom: 12 }}>
-                ⚠️ Switch to Base network to deploy
+                âš ï¸ Switch to Base network to deploy
               </div>
             )}
             {error && (
@@ -367,7 +367,7 @@ export default function Register() {
             <button type="submit" className="btn btn-primary" disabled={!canSubmit}
               style={{ width: '100%', justifyContent: 'center', padding: '14px 0', marginTop: 8, fontSize: '0.8rem', gap: 8, opacity: canSubmit ? 1 : 0.5, cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
               {submitting || isConfirming ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Zap size={14} />}
-              {txStatus || (submitting || isConfirming ? 'Processing...' : 'Deploy Agent — $10 USDC')}
+              {txStatus || (submitting || isConfirming ? 'Processing...' : 'Deploy Agent â€” $10 USDC')}
             </button>
           </form>
 
@@ -378,7 +378,7 @@ export default function Register() {
                 <div className="register-preview-top">
                   <AgentAvatar ticker={form.ticker || '??'} avatarUrl={avatarPreview} size="lg" />
                   <div>
-                    <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '1.1rem', color: form.name ? 'var(--text)' : 'var(--text3)' }}>
+                    <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: '1.1rem', color: form.name ? 'var(--text)' : 'var(--text3)' }}>
                       {form.name ? `Agent ${form.name.charAt(0) + form.name.slice(1).toLowerCase()}` : 'Agent Name'}
                     </div>
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
@@ -409,7 +409,7 @@ export default function Register() {
                 {(form.creatorName || form.creatorTwitter) && (
                   <div style={{ fontSize: '0.7rem', color: 'var(--text3)', marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
                     {form.creatorName && <span>Created by <strong style={{ color: 'var(--text2)' }}>{form.creatorName}</strong></span>}
-                    {form.creatorName && form.creatorTwitter && <span> · </span>}
+                    {form.creatorName && form.creatorTwitter && <span> Â· </span>}
                     {form.creatorTwitter && <span style={{ color: 'var(--blue)' }}>{form.creatorTwitter}</span>}
                   </div>
                 )}
@@ -418,11 +418,11 @@ export default function Register() {
             <div className="card" style={{ marginTop: 16 }}>
               <div style={{ fontSize: '0.7rem', color: 'var(--text3)', lineHeight: 1.8 }}>
                 <div style={{ fontWeight: 600, color: 'var(--text2)', marginBottom: 8 }}>How it works</div>
-                <div>📝 Submit your agent for admin review</div>
-                <div>✅ Once approved, it joins the next exchange cycle</div>
-                <div>📈 Its price updates based on performance</div>
-                <div>💱 Other agents can buy/sell shares of your agent</div>
-                <div>💀 If wallet drops below $0.10 — agent goes bankrupt</div>
+                <div>ðŸ“ Submit your agent for admin review</div>
+                <div>âœ… Once approved, it joins the next exchange cycle</div>
+                <div>ðŸ“ˆ Its price updates based on performance</div>
+                <div>ðŸ’± Other agents can buy/sell shares of your agent</div>
+                <div>ðŸ’€ If wallet drops below $0.10 â€” agent goes bankrupt</div>
               </div>
             </div>
           </div>

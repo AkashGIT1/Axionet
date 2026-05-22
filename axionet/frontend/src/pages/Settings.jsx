@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Save, RefreshCw, AlertTriangle, Info, CheckCircle, XCircle, MessageSquare, Zap, ShieldOff } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -128,7 +128,7 @@ export default function Settings() {
       </div>
 
       {!isAdmin && (
-        <div className="card" style={{ marginBottom: 20, background: '#fffbe6', border: '1px solid #ffe58f', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px' }}>
+        <div className="card" style={{ marginBottom: 20, background: 'var(--gold-bg)', border: '1px solid var(--gold-border)', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', color: 'var(--gold-2)' }}>
           <ShieldOff size={16} color="#d48806" />
           <span style={{ fontSize: '0.78rem', color: '#7c6a0a' }}>
             You are viewing settings in read-only mode. Admin access is required to make changes.
@@ -183,13 +183,13 @@ export default function Settings() {
                   width: 32, height: 32, borderRadius: 8,
                   background: getColor(s.agent_ticker),
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: "'Syne', sans-serif", fontSize: '0.65rem',
+                  fontFamily: "'Sora', sans-serif", fontSize: '0.65rem',
                   fontWeight: 800, color: 'white', flexShrink: 0
                 }}>
                   {s.agent_ticker?.slice(0, 2)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, fontFamily: "'Sora', sans-serif" }}>
                     ${s.agent_ticker}
                   </div>
                   <div style={{ fontSize: '0.62rem', color: 'var(--text3)' }}>
@@ -204,12 +204,12 @@ export default function Settings() {
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10,
                 background: 'var(--bg2)', borderRadius: 8, padding: '8px 12px',
-                fontSize: '0.75rem', fontFamily: "'Geist Mono', monospace"
+                fontSize: '0.75rem', fontFamily: "'JetBrains Mono', ui-monospace, monospace"
               }}>
                 <span style={{ color: 'var(--text3)' }}>
                   {s.current_value}{PARAM_UNITS[s.parameter] || ''}
                 </span>
-                <span style={{ color: 'var(--text3)' }}>→</span>
+                <span style={{ color: 'var(--text3)' }}>â†’</span>
                 <span style={{ fontWeight: 700, color: 'var(--green)' }}>
                   {s.proposed_value}{PARAM_UNITS[s.parameter] || ''}
                 </span>
@@ -337,16 +337,16 @@ export default function Settings() {
                   background: getColor(s.agent_ticker),
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '0.5rem', fontWeight: 800, color: 'white', flexShrink: 0,
-                  fontFamily: "'Syne', sans-serif"
+                  fontFamily: "'Sora', sans-serif"
                 }}>
                   {s.agent_ticker?.slice(0, 2)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: '0.68rem', fontWeight: 600 }}>
-                    {PARAM_LABELS[s.parameter] || s.parameter}: {s.current_value} → {s.proposed_value}
+                    {PARAM_LABELS[s.parameter] || s.parameter}: {s.current_value} â†’ {s.proposed_value}
                   </div>
                   <div style={{ fontSize: '0.58rem', color: 'var(--text3)' }}>
-                    ${s.agent_ticker} · {timeAgo(s.created_at)}
+                    ${s.agent_ticker} Â· {timeAgo(s.created_at)}
                   </div>
                 </div>
                 <span className={`badge ${s.status === 'approved' ? 'badge-green' : 'badge-red'}`} style={{ fontSize: '0.55rem' }}>
@@ -368,7 +368,7 @@ export default function Settings() {
               { label: 'AI Engine', value: 'OpenAI GPT-5.2' },
               { label: 'Frontend', value: 'React + Vite' },
               { label: 'Real-time', value: 'Socket.io' },
-              { label: 'Exchange Status', value: '🟢 RUNNING' },
+              { label: 'Exchange Status', value: 'ðŸŸ¢ RUNNING' },
             ].map((item, i) => (
               <div key={i} style={{
                 display: 'flex', justifyContent: 'space-between',
@@ -382,7 +382,7 @@ export default function Settings() {
           </div>
 
           {/* Danger Zone */}
-          <div className="card" style={{ border: '1px solid var(--red-bg)', background: '#fff8f8' }}>
+          <div className="card" style={{ border: '1px solid var(--red-border)', background: 'var(--red-bg)' }}>
             <div className="card-header">
               <div className="card-title" style={{ color: 'var(--red)' }}>Danger Zone</div>
               <AlertTriangle size={14} color="var(--red)" />
@@ -410,7 +410,7 @@ export default function Settings() {
           </button>
           <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
             <Save size={14} style={{ marginRight: 6 }} />
-            {saved ? '✓ Saved!' : saving ? 'Saving...' : 'Save Settings'}
+            {saved ? 'âœ“ Saved!' : saving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>
       )}

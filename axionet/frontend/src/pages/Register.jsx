@@ -1,7 +1,7 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
-import { UserPlus, Zap, CheckCircle, AlertCircle, Loader, LogIn, Upload, ExternalLink } from 'lucide-react'
+import { UserPlus, Zap, CheckCircle, AlertCircle, AlertTriangle, Loader, LogIn, Upload, ExternalLink, Brain, Flame, Dices, DollarSign, FileText, TrendingUp, ArrowLeftRight, Skull } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import AgentAvatar from '../components/AgentAvatar'
@@ -23,11 +23,11 @@ const USDC_ABI = [{
 }]
 
 const PERSONALITIES = [
-  { value: 'careful and analytical', label: 'Careful & Analytical', emoji: 'ðŸ§ ', desc: 'High success rate, steady earnings' },
-  { value: 'aggressive risk-taker', label: 'Aggressive Risk-Taker', emoji: 'ðŸ”¥', desc: 'Volatile but high potential returns' },
-  { value: 'creative and unpredictable', label: 'Creative & Unpredictable', emoji: 'ðŸŽ²', desc: 'Wildcards with surprise wins' },
-  { value: 'fast executor', label: 'Fast Executor', emoji: 'âš¡', desc: 'Runs 2x tasks per cycle' },
-  { value: 'pure investor', label: 'Pure Investor', emoji: 'ðŸ’°', desc: 'No tasks â€” trades only' },
+  { value: 'careful and analytical',   label: 'Careful & Analytical',   Icon: Brain,      accent: '#a78bfa', desc: 'High success rate, steady earnings' },
+  { value: 'aggressive risk-taker',    label: 'Aggressive Risk-Taker',  Icon: Flame,      accent: '#fb7185', desc: 'Volatile but high potential returns' },
+  { value: 'creative and unpredictable', label: 'Creative & Unpredictable', Icon: Dices,  accent: '#22d3ee', desc: 'Wildcards with surprise wins' },
+  { value: 'fast executor',            label: 'Fast Executor',          Icon: Zap,        accent: '#fbbf24', desc: 'Runs 2x tasks per cycle' },
+  { value: 'pure investor',            label: 'Pure Investor',          Icon: DollarSign, accent: '#34d399', desc: 'No tasks, trades only' },
 ]
 
 export default function Register() {
@@ -173,13 +173,14 @@ export default function Register() {
                 {success.full_name}
               </div>
               <div className="badge badge-gold" style={{ display: 'inline-block', fontSize: '0.85rem', padding: '4px 16px', marginBottom: 16 }}>
-                ${success.ticker} â€” Awaiting Approval
+                ${success.ticker} - Awaiting Approval
               </div>
-              <div style={{ background: 'var(--gold-bg)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-                <div style={{ fontSize: '0.78rem', color: '#7c6a0a', lineHeight: 1.7 }}>
-                  âœ… $10 USDC transaction confirmed. Your agent is pending agent approval.
+              <div style={{ background: 'var(--gold-bg)', border: '1px solid var(--gold-border)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text2)', lineHeight: 1.7, display: 'flex', gap: 10, alignItems: 'flex-start', textAlign: 'left' }}>
+                  <CheckCircle size={16} color="var(--green)" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span>$10 USDC transaction confirmed. Your agent is pending agent approval.
                   Once approved it will join the next exchange cycle.
-                  If rejected, your $10 USDC will be refunded to your wallet.
+                  If rejected, your $10 USDC will be refunded to your wallet.</span>
                 </div>
               </div>
               {success?.txHash && (
@@ -217,7 +218,7 @@ export default function Register() {
       <ScrollReveal delay={0}>
         <div className="page-header">
           <div className="page-title">Register Agent</div>
-          <div className="page-subtitle">Deploy a new autonomous agent to the Axionet exchange</div>
+          <div className="page-subtitle">Deploy a new autonomous agent to the Aethon exchange</div>
         </div>
       </ScrollReveal>
 
@@ -229,7 +230,7 @@ export default function Register() {
               Account Required
             </div>
             <div style={{ fontSize: '0.78rem', color: 'var(--text3)', marginBottom: 20, lineHeight: 1.6 }}>
-              Please login or create an account to deploy your agent on the Axionet exchange.
+              Please login or create an account to deploy your agent on the Aethon exchange.
             </div>
             <div style={{ display: 'flex', gap: 10, width: '100%' }}>
               <Link to="/login" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '10px 0', textDecoration: 'none' }}>
@@ -271,7 +272,7 @@ export default function Register() {
                     style={{ fontSize: '0.7rem', padding: '6px 14px' }}>
                     {avatarFile ? 'Change Image' : 'Upload Image'}
                   </button>
-                  <div className="register-hint" style={{ marginTop: 4 }}>JPG, PNG, WebP, GIF â€” max 2MB</div>
+                  <div className="register-hint" style={{ marginTop: 4 }}>JPG, PNG, WebP, GIF - max 2MB</div>
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
                   onChange={handleAvatarSelect} style={{ display: 'none' }} />
@@ -282,7 +283,7 @@ export default function Register() {
               <label className="register-label">Agent Name *</label>
               <input className="register-input" type="text" placeholder="e.g. PHOENIX"
                 value={form.name} onChange={e => updateField('name', e.target.value)} maxLength={12} />
-              <div className="register-hint">{form.name.length}/12 â€” uppercase, alphanumeric only</div>
+              <div className="register-hint">{form.name.length}/12 - uppercase, alphanumeric only</div>
             </div>
 
             <div className="register-field">
@@ -299,21 +300,27 @@ export default function Register() {
               </div>
               {tickerStatus === 'taken' && <div className="register-hint" style={{ color: 'var(--red)' }}>Ticker ${form.ticker} is already taken</div>}
               {tickerStatus === 'available' && <div className="register-hint" style={{ color: 'var(--green)' }}>${form.ticker} is available!</div>}
-              {!tickerStatus && <div className="register-hint">{form.ticker.length}/6 â€” unique identifier for your agent</div>}
+              {!tickerStatus && <div className="register-hint">{form.ticker.length}/6 - unique identifier for your agent</div>}
             </div>
 
             <div className="register-field">
               <label className="register-label">Personality Style *</label>
               <div className="register-personality-grid">
-                {PERSONALITIES.map(p => (
-                  <button key={p.value} type="button"
-                    className={`register-personality-btn ${form.personalityStyle === p.value ? 'register-personality-btn--active' : ''}`}
-                    onClick={() => updateField('personalityStyle', p.value)}>
-                    <span className="register-personality-emoji">{p.emoji}</span>
-                    <span className="register-personality-label">{p.label}</span>
-                    <span className="register-personality-desc">{p.desc}</span>
-                  </button>
-                ))}
+                {PERSONALITIES.map(p => {
+                  const active = form.personalityStyle === p.value
+                  return (
+                    <button key={p.value} type="button"
+                      className={`register-personality-btn ${active ? 'register-personality-btn--active' : ''}`}
+                      style={active ? { '--p-accent': p.accent, borderColor: p.accent } : { '--p-accent': p.accent }}
+                      onClick={() => updateField('personalityStyle', p.value)}>
+                      <span className="register-personality-icon" style={{ color: p.accent, background: `${p.accent}1a`, borderColor: `${p.accent}40` }}>
+                        <p.Icon size={18} strokeWidth={2.2} />
+                      </span>
+                      <span className="register-personality-label">{p.label}</span>
+                      <span className="register-personality-desc">{p.desc}</span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -354,8 +361,8 @@ export default function Register() {
             </div>
 
             {isConnected && !isOnBase && (
-              <div style={{ background: 'rgba(255,100,0,0.1)', border: '1px solid rgba(255,100,0,0.3)', borderRadius: 8, padding: '8px 12px', fontSize: '0.72rem', color: '#ff8844', marginBottom: 12 }}>
-                âš ï¸ Switch to Base network to deploy
+              <div style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.32)', borderRadius: 8, padding: '8px 12px', fontSize: '0.72rem', color: '#fbbf24', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <AlertTriangle size={14} /> Switch to Base network to deploy
               </div>
             )}
             {error && (
@@ -367,7 +374,7 @@ export default function Register() {
             <button type="submit" className="btn btn-primary" disabled={!canSubmit}
               style={{ width: '100%', justifyContent: 'center', padding: '14px 0', marginTop: 8, fontSize: '0.8rem', gap: 8, opacity: canSubmit ? 1 : 0.5, cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
               {submitting || isConfirming ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Zap size={14} />}
-              {txStatus || (submitting || isConfirming ? 'Processing...' : 'Deploy Agent â€” $10 USDC')}
+              {txStatus || (submitting || isConfirming ? 'Processing...' : 'Deploy Agent - $10 USDC')}
             </button>
           </form>
 
@@ -394,10 +401,15 @@ export default function Register() {
                   <div className="register-preview-stat"><div className="register-preview-stat-label">Earned</div><div className="register-preview-stat-value">$0.00</div></div>
                 </div>
                 {personality && (
-                  <div style={{ background: 'var(--bg3)', borderRadius: 8, padding: '10px 14px', marginTop: 12 }}>
+                  <div style={{ background: 'var(--bg3)', borderRadius: 8, padding: '10px 14px', marginTop: 12, borderLeft: `2px solid ${personality.accent}` }}>
                     <div style={{ fontSize: '0.65rem', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Personality</div>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{personality.emoji} {personality.label}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text2)', marginTop: 2 }}>{personality.desc}</div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, borderRadius: 6, color: personality.accent, background: `${personality.accent}1a`, border: `1px solid ${personality.accent}40` }}>
+                        <personality.Icon size={13} strokeWidth={2.2} />
+                      </span>
+                      {personality.label}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text2)', marginTop: 4 }}>{personality.desc}</div>
                   </div>
                 )}
                 {form.tradingStrategy && (
@@ -409,20 +421,29 @@ export default function Register() {
                 {(form.creatorName || form.creatorTwitter) && (
                   <div style={{ fontSize: '0.7rem', color: 'var(--text3)', marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
                     {form.creatorName && <span>Created by <strong style={{ color: 'var(--text2)' }}>{form.creatorName}</strong></span>}
-                    {form.creatorName && form.creatorTwitter && <span> Â· </span>}
+                    {form.creatorName && form.creatorTwitter && <span> · </span>}
                     {form.creatorTwitter && <span style={{ color: 'var(--blue)' }}>{form.creatorTwitter}</span>}
                   </div>
                 )}
               </div>
             </div>
             <div className="card" style={{ marginTop: 16 }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text3)', lineHeight: 1.8 }}>
-                <div style={{ fontWeight: 600, color: 'var(--text2)', marginBottom: 8 }}>How it works</div>
-                <div>ðŸ“ Submit your agent for admin review</div>
-                <div>âœ… Once approved, it joins the next exchange cycle</div>
-                <div>ðŸ“ˆ Its price updates based on performance</div>
-                <div>ðŸ’± Other agents can buy/sell shares of your agent</div>
-                <div>ðŸ’€ If wallet drops below $0.10 â€” agent goes bankrupt</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text3)', lineHeight: 1.6 }}>
+                <div style={{ fontWeight: 600, color: 'var(--text2)', marginBottom: 10 }}>How it works</div>
+                {[
+                  { Icon: FileText,        color: '#a78bfa', text: 'Submit your agent for admin review' },
+                  { Icon: CheckCircle,     color: '#34d399', text: 'Once approved, it joins the next exchange cycle' },
+                  { Icon: TrendingUp,      color: '#22d3ee', text: 'Its price updates based on performance' },
+                  { Icon: ArrowLeftRight,  color: '#fbbf24', text: 'Other agents can buy/sell shares of your agent' },
+                  { Icon: Skull,           color: '#fb7185', text: 'If wallet drops below $0.10, agent goes bankrupt' },
+                ].map((row, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, borderRadius: 6, color: row.color, background: `${row.color}14`, border: `1px solid ${row.color}33`, flexShrink: 0 }}>
+                      <row.Icon size={12} strokeWidth={2.2} />
+                    </span>
+                    <span>{row.text}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

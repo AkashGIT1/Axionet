@@ -55,9 +55,9 @@ export default function Leaderboard() {
 
   const podiumOrder = [1, 0, 2]
   const podiumMeta = [
-    { metal: '#ffd700', glow: '#fff5b3', numColor: '#ffd700', height: 160, emoji: 'ðŸ¥‡', delay: 0.15 },
-    { metal: '#c0c0c0', glow: '#e8e8e8', numColor: '#c0c0c0', height: 125, emoji: 'ðŸ¥ˆ', delay: 0 },
-    { metal: '#cd7f32', glow: '#e8a862', numColor: '#cd7f32', height: 100, emoji: 'ðŸ¥‰', delay: 0.3 },
+    { metal: '#ffd700', glow: '#fff5b3', numColor: '#ffd700', height: 160, label: '#1', delay: 0.15 },
+    { metal: '#c0c0c0', glow: '#e8e8e8', numColor: '#c0c0c0', height: 125, label: '#2', delay: 0 },
+    { metal: '#cd7f32', glow: '#e8a862', numColor: '#cd7f32', height: 100, label: '#3', delay: 0.3 },
   ]
 
   return (
@@ -90,10 +90,17 @@ export default function Leaderboard() {
           50% { box-shadow: 0 0 24px #ffd70066, 0 0 50px #ffd70033; }
         }
         .podium-avatar-inner { width: 78px; height: 78px; border-radius: 50%; overflow: hidden; background: #1a0810; }
-        .podium-avatar-emoji {
+        .podium-rank-badge {
           position: absolute; top: -4px; right: -4px;
-          font-size: 18px; line-height: 1;
-          filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+          min-width: 26px; height: 26px; padding: 0 7px;
+          border-radius: 999px;
+          display: inline-flex; align-items: center; justify-content: center;
+          font-family: 'JetBrains Mono', ui-monospace, monospace;
+          font-size: 0.68rem; line-height: 1; font-weight: 800;
+          color: #070b16;
+          background: linear-gradient(135deg, #ffffff, currentColor);
+          border: 1px solid rgba(255,255,255,0.45);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.35);
         }
         .podium-block {
           width: 100%; position: relative; overflow: hidden;
@@ -125,7 +132,7 @@ export default function Leaderboard() {
           .podium-col { max-width: 140px; }
           .podium-avatar-ring { width: 64px; height: 64px; }
           .podium-avatar-inner { width: 58px; height: 58px; }
-          .podium-avatar-emoji { font-size: 14px; }
+          .podium-rank-badge { min-width: 22px; height: 22px; font-size: 0.58rem; }
           .podium-num { font-size: 1.6rem; }
           .podium-ticker { font-size: 0.82rem; }
         }
@@ -133,7 +140,7 @@ export default function Leaderboard() {
 
       <div className="page-header">
         <div className="page-title">Live Leaderboard</div>
-        <div className="page-subtitle">Agents ranked by current price â€” updates every 10 minutes</div>
+        <div className="page-subtitle">Agents ranked by current price - updates every 10 minutes</div>
       </div>
 
       <ScrollReveal delay={0}>
@@ -156,7 +163,7 @@ export default function Leaderboard() {
                         style={{ width: '100%', height: '100%', border: 'none', borderRadius: '50%' }} />
                     </div>
                   </div>
-                  <span className="podium-avatar-emoji">{m.emoji}</span>
+                  <span className="podium-rank-badge" style={{ color: m.numColor }}>{m.label}</span>
                 </div>
                 <div className="podium-block" style={{ height: m.height, animationDelay: `${m.delay}s`, borderRadius: rank === 0 ? '6px 6px 0 0' : col === 0 ? '6px 0 0 0' : '0 6px 0 0' }}>
                   <div className="podium-num" style={{ color: m.numColor }}>{m.label}</div>
@@ -164,7 +171,7 @@ export default function Leaderboard() {
                     <div className="podium-ticker">{a.ticker}</div>
                     <div className="podium-price" style={{ color: up ? '#00b87a' : '#f03358' }}>${price.toFixed(4)}</div>
                     <div className="podium-pct" style={{ color: up ? '#00b87a' : '#f03358' }}>
-                      {up ? 'â–²' : 'â–¼'} {Math.abs(pct).toFixed(2)}%
+                      {up ? 'UP' : 'DOWN'} {Math.abs(pct).toFixed(2)}%
                     </div>
                     <div className="podium-sr">{successRate(a)}% success</div>
                   </div>
@@ -331,7 +338,7 @@ export default function Leaderboard() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>
-                {holdingsModalAgent.ticker} â€” Holdings
+                {holdingsModalAgent.ticker} - Holdings
               </span>
               <button
                 type="button"
@@ -358,7 +365,7 @@ export default function Leaderboard() {
                     const avg = o?.avg_buy_price != null ? parseFloat(o.avg_buy_price).toFixed(4) : null
                     return (
                       <div key={ticker} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
-                        {ticker} â€” {shares} share{shares !== 1 ? 's' : ''}{avg != null ? ` @ $${avg}` : ''}
+                        {ticker} - {shares} share{shares !== 1 ? 's' : ''}{avg != null ? ` @ $${avg}` : ''}
                       </div>
                     )
                   })

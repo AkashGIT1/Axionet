@@ -5,7 +5,7 @@ import { base } from 'wagmi/chains'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const config = getDefaultConfig({
-  appName: 'Axionet Betting',
+  appName: 'Aethon Betting',
   projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
   chains: [base],
   ssr: false,

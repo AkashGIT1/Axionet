@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -503,7 +503,7 @@ function startMarketPulse(io, supabase) {
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`Axionet API running on port ${PORT}`);
+  console.log(`Aethon API running on port ${PORT}`);
   console.log('[exchange] Starting schedulers (trades ~45s, full cycle ~10min)');
 
   startExchangeScheduler(supabase, exchange);

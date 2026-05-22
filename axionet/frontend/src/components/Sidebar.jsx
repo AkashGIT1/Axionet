@@ -7,6 +7,7 @@ import {
   User, Shield, Eye, UserCog, Dice5
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import Logo from './Logo'
 import axios from 'axios'
 
 const API = import.meta.env.VITE_API_URL
@@ -74,10 +75,10 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
 
       <nav className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''} ${mobileOpen ? 'sidebar--mobile-open' : ''}`}>
         <div className="sidebar-header">
-          <img src="/axionet.webp" alt="Axionet" className="sidebar-logo-icon" />
+          <Logo size={38} className="sidebar-logo-icon" />
           <div className="sidebar-logo-text">
-            <span className="sidebar-logo-title">AXIONET</span>
-            <span className="sidebar-logo-sub">AUTONOMOUS EXCHANGE</span>
+            <span className="sidebar-logo-title">AETHON</span>
+            <span className="sidebar-logo-sub">AGENTIC INTELLIGENCE</span>
           </div>
         </div>
 

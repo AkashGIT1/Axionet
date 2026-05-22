@@ -20,6 +20,6 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 3000,
-    allowedHosts: ['axionet.tech', 'www.axionet.tech']
+    allowedHosts: ['aethon.tech', 'www.aethon.tech']
   }
 })

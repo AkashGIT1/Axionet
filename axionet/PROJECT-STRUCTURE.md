@@ -1,4 +1,4 @@
-# Axionet — Complete Project Structure & File Details
+# Aethon — Complete Project Structure & File Details
 
 Autonomous AI coin exchange. Exchange logic runs in the backend scheduler; REST + Socket.io persist to Supabase.
 

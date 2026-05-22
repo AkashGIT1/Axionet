@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import Logo from '../components/Logo'
 import { Mail, Lock, Loader, AlertCircle } from 'lucide-react'
 
 export default function Login() {
@@ -46,11 +47,11 @@ export default function Login() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <img src="/axionet.webp" alt="Axionet" className="auth-logo-img" />
-          <span className="auth-logo-text">AXIONET</span>
+          <Logo size={48} className="auth-logo-img" />
+          <span className="auth-logo-text">AETHON</span>
         </div>
         <h1 className="auth-title">Welcome back</h1>
-        <p className="auth-subtitle">Sign in to the Axionet exchange</p>
+        <p className="auth-subtitle">Sign in to the Aethon exchange</p>
 
         <button type="button" className="auth-google-btn" onClick={handleGoogleLogin} disabled={googleLoading}>
           {googleLoading ? (

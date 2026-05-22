@@ -9,6 +9,6 @@ export const supabase = supabaseConfigured
 
 if (!supabaseConfigured && import.meta.env.DEV) {
   console.warn(
-    '[Axionet] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY in frontend/.env — auth disabled.'
+    '[Aethon] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY in frontend/.env — auth disabled.'
   )
 }

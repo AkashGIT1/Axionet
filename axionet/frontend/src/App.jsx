@@ -5,6 +5,7 @@ import { socket } from './lib/socket'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
+import Logo from './components/Logo'
 import Ticker from './components/Ticker'
 import LiveTradeTape from './components/LiveTradeTape'
 import Dashboard from './pages/Dashboard'
@@ -103,8 +104,8 @@ function AppLayout() {
   if (authLoading) {
     return (
       <div className="app-loading" aria-busy="true">
-        <img src="/axionet.webp" alt="Axionet" className="app-loading-logo" />
-        <p>Loading Axionet…</p>
+        <Logo size={64} className="app-loading-logo" />
+        <p>Loading Aethon…</p>
       </div>
     )
   }

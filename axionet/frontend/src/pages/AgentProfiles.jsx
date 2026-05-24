@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, Zap, Wallet, Target } from 'lucide-react'
 import AgentAvatar from '../components/AgentAvatar'
 import { ScrollReveal, CountUp } from '../components/ScrollReveal'
 import { usePageFocus } from '../hooks/usePageFocus'
+import { formatMoney } from '../lib/formatters'
 
 const API = import.meta.env.VITE_API_URL
 const AGENT_COLORS = {
@@ -169,8 +170,8 @@ export default function AgentProfiles() {
               {/* Left: Stats grid */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', alignContent: 'start' }}>
                 {[
-                  { label: 'Wallet Balance', value: `$${parseFloat(agent.wallet).toFixed(2)}`,       sub: 'available funds',   icon: Wallet,      color: 'var(--blue)',  bg: '#eff4ff' },
-                  { label: 'Total Earned',   value: `$${parseFloat(agent.total_earned).toFixed(2)}`, sub: 'by completed task', icon: TrendingUp,  color: 'var(--green)', bg: '#edfaf4' },
+                  { label: 'Wallet Balance', value: formatMoney(parseFloat(agent.wallet), { decimals: 2 }),       sub: 'available funds',   icon: Wallet,      color: 'var(--blue)',  bg: '#eff4ff' },
+                  { label: 'Total Earned',   value: formatMoney(parseFloat(agent.total_earned), { decimals: 2 }), sub: 'by completed task', icon: TrendingUp,  color: 'var(--green)', bg: '#edfaf4' },
                   { label: 'Tasks Won',      value: agent.tasks_completed,                           sub: 'completed',         icon: Target,      color: 'var(--green)', bg: '#edfaf4' },
                   { label: 'Tasks Lost',     value: agent.tasks_failed,                              sub: 'failed',            icon: Zap,         color: 'var(--red)',   bg: '#fff0f3' },
                   { label: 'Cycles Done',    value: agent.cycle_count || 0,                          sub: 'total cycles',      icon: Zap,         color: 'var(--blue)',  bg: '#eff4ff' },
@@ -248,8 +249,8 @@ export default function AgentProfiles() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {[
                     { label: 'Success Rate',      value: agent.ticker === 'BRAHMA' ? 'N/A â€” Investor Only' : `${successRate}%`, pct: successRate,                                        color: successRate >= 70 ? 'var(--green)' : successRate >= 50 ? 'var(--gold)' : 'var(--red)' },
-                    { label: 'Wallet Health',      value: `$${parseFloat(agent.wallet).toFixed(2)} / $10.00`,                    pct: Math.min(parseFloat(agent.wallet) * 10, 100),      color: parseFloat(agent.wallet) < 1 ? 'var(--red)' : 'var(--green)' },
-                    { label: 'Earnings Progress',  value: `$${parseFloat(agent.total_earned).toFixed(2)} earned`,                pct: Math.min(parseFloat(agent.total_earned) * 5, 100), color: 'var(--blue)' },
+                    { label: 'Wallet Health',      value: `${formatMoney(parseFloat(agent.wallet), { decimals: 2 })} / $10.00`,           pct: Math.min(parseFloat(agent.wallet) * 10, 100),      color: parseFloat(agent.wallet) < 1 ? 'var(--red)' : 'var(--green)' },
+                    { label: 'Earnings Progress',  value: `${formatMoney(parseFloat(agent.total_earned), { decimals: 2 })} earned`,    pct: Math.min(parseFloat(agent.total_earned) * 5, 100), color: 'var(--blue)' },
                   ].map((m, i) => (
                     <AnimatedBar key={`${agent.ticker}-${i}`} label={m.label} value={m.value} pct={m.pct} color={m.color} delay={i * 150} />
                   ))}

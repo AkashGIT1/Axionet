@@ -2,6 +2,30 @@
  * Exchange operations — used by HTTP routes and the built-in cycle scheduler.
  */
 
+// Economic constants — tuned to keep prices, wallets, and treasury in a realistic band.
+const FEE_RATE = 0.005                 // 0.5% per trade (was 2% — that compounded into runaway treasury)
+const MAX_TRADE_IMPACT_PCT = 0.015     // single trade can move price at most ±1.5%
+const PRICE_CEILING = 100              // hard upper bound so a single agent can't moon to $10k
+const PRICE_FLOOR = 0.01
+const PRICE_NOISE_PCT = 0.015          // ±1.5% per priceUpdate cycle (was ±3%)
+const PRICE_TOTAL_CHANGE_CAP = 0.03    // clamp net change per cycle to ±3%
+const TASK_EARN_MAX = 1.0              // max $1.00 per successful task (was $6)
+const TASK_EARN_MIN = 0.25
+const CONTENT_EARN_MAX = 1.0
+const CONTENT_EARN_MIN = 0.25
+const PREDICTION_REWARD_CAP = 0.75     // cap the per-correct-prediction reward (was up to $3)
+
+// Convert a share count into a bounded price impact:
+//   shares=1 → ~0.35%, shares=4 → ~0.7%, large orders saturate at MAX_TRADE_IMPACT_PCT.
+function tradeImpactPct(shares) {
+  const raw = 0.0035 * Math.sqrt(Math.max(1, shares))
+  return Math.min(MAX_TRADE_IMPACT_PCT, raw)
+}
+
+function clampPrice(p) {
+  return Math.min(PRICE_CEILING, Math.max(PRICE_FLOOR, p))
+}
+
 const PERSONALITY_WIN_RATES = [
   { match: /careful|analytical/i, rate: 0.8, tasksPerCycle: 1 },
   { match: /aggressive/i, rate: 0.55, tasksPerCycle: 1 },
@@ -97,7 +121,7 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
 
     const price = parseFloat(targetAgent.price)
     const cost = shares * price
-    const fee = parseFloat((cost * 0.02).toFixed(4))
+    const fee = parseFloat((cost * FEE_RATE).toFixed(4))
     const total = cost + fee
 
     if (parseFloat(buyerAgent.wallet) < total) throw new Error('Insufficient wallet balance')
@@ -143,7 +167,7 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
       exchange_wallet: parseFloat(treasury.exchange_wallet) + fee,
     }).eq('id', treasury.id)
 
-    const newTargetPrice = parseFloat((price * (1 + shares * 0.005)).toFixed(4))
+    const newTargetPrice = parseFloat(clampPrice(price * (1 + tradeImpactPct(shares))).toFixed(4))
     await supabase.from('agents').update({ price: newTargetPrice }).eq('ticker', target)
     await supabase.from('price_history').insert({ agent_ticker: target, price: newTargetPrice })
 
@@ -170,7 +194,7 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
 
     const currentPrice = parseFloat(assetAgent.price)
     const proceeds = shares * currentPrice
-    const fee = parseFloat((proceeds * 0.02).toFixed(4))
+    const fee = parseFloat((proceeds * FEE_RATE).toFixed(4))
     const netProceeds = proceeds - fee
     const avgBuyPrice = sharesOwned[asset].avg_buy_price
     const profit = ((currentPrice - avgBuyPrice) / avgBuyPrice * 100).toFixed(2)
@@ -210,7 +234,7 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
       exchange_wallet: parseFloat(treasury.exchange_wallet) + fee,
     }).eq('id', treasury.id)
 
-    const newAssetPrice = Math.max(0.01, parseFloat((currentPrice * (1 - shares * 0.005)).toFixed(4)))
+    const newAssetPrice = parseFloat(clampPrice(currentPrice * (1 - tradeImpactPct(shares))).toFixed(4))
     await supabase.from('agents').update({ price: newAssetPrice }).eq('ticker', asset)
     await supabase.from('price_history').insert({ agent_ticker: asset, price: newAssetPrice })
 
@@ -239,19 +263,21 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
 
     let momentum = 0
     ;(recentActivity || []).forEach((a) => {
-      if (a.action_type === 'prediction_result' && a.amount > 0) momentum += 0.02
-      if (a.action_type === 'prediction_result' && a.amount === 0) momentum -= 0.03
-      if (a.action_type === 'content' && a.amount > 4) momentum += 0.01
-      if (a.action_type === 'content' && a.amount <= 2) momentum -= 0.01
-      if (a.action_type === 'trade' && a.amount > 5) momentum += 0.005
-      if (a.action_type === 'trade' && a.amount < 0) momentum -= 0.01
+      if (a.action_type === 'prediction_result' && a.amount > 0) momentum += 0.010
+      if (a.action_type === 'prediction_result' && a.amount === 0) momentum -= 0.015
+      if (a.action_type === 'content' && a.amount > 4) momentum += 0.005
+      if (a.action_type === 'content' && a.amount <= 2) momentum -= 0.005
+      if (a.action_type === 'trade' && a.amount > 5) momentum += 0.0025
+      if (a.action_type === 'trade' && a.amount < 0) momentum -= 0.005
     })
 
-    const walletFactor = agent.wallet > 100 ? 0.005 : agent.wallet > 50 ? 0 : agent.wallet < 10 ? -0.03 : -0.01
-    const noise = (Math.random() - 0.5) * 0.06
-    const totalChange = momentum + walletFactor + noise
+    // Wallet pressure: low wallets drift down, healthy wallets drift sideways.
+    const walletFactor = agent.wallet > 50 ? 0.002 : agent.wallet > 20 ? 0 : agent.wallet < 5 ? -0.015 : -0.005
+    const noise = (Math.random() - 0.5) * (PRICE_NOISE_PCT * 2) // ±PRICE_NOISE_PCT
+    const rawChange = momentum + walletFactor + noise
+    const totalChange = Math.max(-PRICE_TOTAL_CHANGE_CAP, Math.min(PRICE_TOTAL_CHANGE_CAP, rawChange))
     const currentPrice = parseFloat(agent.price)
-    const newPrice = Math.max(0.01, parseFloat((currentPrice * (1 + totalChange)).toFixed(4)))
+    const newPrice = parseFloat(clampPrice(currentPrice * (1 + totalChange)).toFixed(4))
 
     await supabase.from('agents').update({ price: newPrice, updated_at: new Date() }).eq('ticker', ticker)
     await supabase.from('price_history').insert({ agent_ticker: ticker, price: newPrice })
@@ -388,14 +414,16 @@ function createExchangeService(supabase, io, { onDataChange } = {}) {
     if (!agent) throw new Error('Agent not found')
 
     const style = (agent.style || '').toLowerCase()
-    let reward = 1.0
+    let reward = 0.4
     let penalty = 0.1
 
-    if (style.includes('aggressive')) { reward = 3.0; penalty = 0.5 }
-    else if (style.includes('creative')) { reward = 2.0; penalty = 0 }
-    else if (style.includes('careful') || style.includes('analytical')) { reward = 1.5; penalty = 0.2 }
-    else if (style.includes('fast')) { reward = 1.0; penalty = 0.1 }
+    if (style.includes('aggressive')) { reward = 0.75; penalty = 0.35 }
+    else if (style.includes('creative')) { reward = 0.55; penalty = 0 }
+    else if (style.includes('careful') || style.includes('analytical')) { reward = 0.5; penalty = 0.2 }
+    else if (style.includes('fast')) { reward = 0.4; penalty = 0.1 }
     else if (style.includes('pure investor')) { reward = 0; penalty = 0 }
+
+    reward = Math.min(reward, PREDICTION_REWARD_CAP)
 
     const actualReward = was_correct ? reward : 0
     const actualPenalty = was_correct ? 0 : penalty

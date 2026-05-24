@@ -6,6 +6,7 @@ import AgentAvatar from '../components/AgentAvatar'
 import { ScrollReveal, CountUp } from '../components/ScrollReveal'
 import { API_BASE } from '../lib/config'
 import { socket } from '../lib/socket'
+import { formatMoney, formatNumber } from '../lib/formatters'
 
 const API = API_BASE
 
@@ -132,59 +133,71 @@ export default function Dashboard({ agents: liveAgents, treasury: liveTreasury }
       {/* KPI Row */}
       <ScrollReveal delay={0}>
       <div className="grid-4" style={{ marginBottom: '20px' }}>
-        {[
-          {
-            label: 'Treasury Collected',
-            value: `$${parseFloat(treasury?.total_fees || 0).toFixed(2)}`,
-            sub: '+2% per trade',
-            icon: DollarSign,
-            color: '#34d399',
-            bg: 'rgba(16, 185, 129, 0.12)',
-            ring: 'rgba(16, 185, 129, 0.28)'
-          },
-          {
-            label: 'Total Trades',
-            value: treasury?.total_trades || 0,
-            sub: 'Agent vs Agent',
-            icon: ArrowLeftRight,
-            color: '#22d3ee',
-            bg: 'rgba(34, 211, 238, 0.12)',
-            ring: 'rgba(34, 211, 238, 0.28)'
-          },
-          {
-            label: 'Tasks Attempted',
-            value: treasury?.total_tasks || 0,
-            sub: 'Earning tasks',
-            icon: Zap,
-            color: '#fbbf24',
-            bg: 'rgba(245, 158, 11, 0.12)',
-            ring: 'rgba(245, 158, 11, 0.28)'
-          },
-          {
-            label: 'Active Agents',
-            value: agents.filter(a => a.status === 'active').length,
-            sub: `${agents.filter(a => a.status === 'bankrupt').length} bankrupt`,
-            icon: Users,
-            color: '#a78bfa',
-            bg: 'rgba(139, 92, 246, 0.14)',
-            ring: 'rgba(139, 92, 246, 0.32)'
-          }
-        ].map((kpi, i) => {
-          const valueStr = typeof kpi.value === 'string' ? kpi.value : String(kpi.value)
-          // Step the stat-number font down for long values so the prefix never gets clipped
-          const len = valueStr.length
-          const fit = len > 14 ? 'xxs' : len > 11 ? 'xs' : len > 8 ? 'sm' : len > 6 ? 'md' : undefined
+        {(() => {
+          const feesRaw = parseFloat(treasury?.total_fees || 0)
+          const tradesRaw = treasury?.total_trades || 0
+          const tasksRaw = treasury?.total_tasks || 0
+          const activeRaw = agents.filter(a => a.status === 'active').length
+          const bankruptRaw = agents.filter(a => a.status === 'bankrupt').length
+          return [
+            {
+              label: 'Treasury Collected',
+              raw: feesRaw,
+              display: formatMoney(feesRaw, { decimals: 2 }),
+              format: (n) => formatMoney(n, { decimals: 2 }),
+              sub: '+0.5% per trade',
+              icon: DollarSign,
+              color: '#34d399',
+              bg: 'rgba(16, 185, 129, 0.12)',
+              ring: 'rgba(16, 185, 129, 0.28)'
+            },
+            {
+              label: 'Total Trades',
+              raw: tradesRaw,
+              display: formatNumber(tradesRaw),
+              format: (n) => formatNumber(n),
+              sub: 'Agent vs Agent',
+              icon: ArrowLeftRight,
+              color: '#22d3ee',
+              bg: 'rgba(34, 211, 238, 0.12)',
+              ring: 'rgba(34, 211, 238, 0.28)'
+            },
+            {
+              label: 'Tasks Attempted',
+              raw: tasksRaw,
+              display: formatNumber(tasksRaw),
+              format: (n) => formatNumber(n),
+              sub: 'Earning tasks',
+              icon: Zap,
+              color: '#fbbf24',
+              bg: 'rgba(245, 158, 11, 0.12)',
+              ring: 'rgba(245, 158, 11, 0.28)'
+            },
+            {
+              label: 'Active Agents',
+              raw: activeRaw,
+              display: String(activeRaw),
+              format: (n) => String(Math.round(n)),
+              sub: `${bankruptRaw} bankrupt`,
+              icon: Users,
+              color: '#a78bfa',
+              bg: 'rgba(139, 92, 246, 0.14)',
+              ring: 'rgba(139, 92, 246, 0.32)'
+            }
+          ]
+        })().map((kpi, i) => {
+          // With compact notation the strings stay short (e.g. "$1.2M"), but we still
+          // keep the data-fit hook for the rare 8+ char outlier.
+          const len = kpi.display.length
+          const fit = len > 11 ? 'xs' : len > 8 ? 'sm' : len > 6 ? 'md' : undefined
           return (
             <div key={i} className="card kpi-card">
               <div className="kpi-icon" style={{ background: kpi.bg, boxShadow: `0 0 0 1px ${kpi.ring}, 0 0 20px -4px ${kpi.bg}` }}>
                 <kpi.icon size={18} color={kpi.color} />
               </div>
               <div className="kpi-label">{kpi.label}</div>
-              <div className="stat-number kpi-value" data-fit={fit} title={valueStr} style={{ color: kpi.color }}>
-                <CountUp value={typeof kpi.value === 'string' ? kpi.value.replace(/[^0-9.]/g, '') : kpi.value}
-                  prefix={typeof kpi.value === 'string' && kpi.value.startsWith('$') ? '$' : ''}
-                  decimals={typeof kpi.value === 'string' && kpi.value.includes('.') ? 2 : 0}
-                />
+              <div className="stat-number kpi-value" data-fit={fit} title={kpi.display} style={{ color: kpi.color }}>
+                <CountUp value={kpi.raw} format={kpi.format} />
               </div>
               <div className="kpi-sub">{kpi.sub}</div>
             </div>

@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { DollarSign, TrendingUp, Percent, Landmark } from 'lucide-react'
 import { ScrollReveal, CountUp } from '../components/ScrollReveal'
 import { usePageFocus } from '../hooks/usePageFocus'
+import { formatMoney, formatNumber } from '../lib/formatters'
 
 const API = import.meta.env.VITE_API_URL
 
@@ -61,16 +62,16 @@ export default function Treasury() {
       <ScrollReveal delay={100}>
         <div className="treasury-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
           {[
-            { label: 'Total Fees Collected', value: parseFloat(treasury?.total_fees || 0),    prefix: '$', decimals: 4, icon: DollarSign, color: '#00b87a', bg: '#edfaf4' },
-            { label: 'Exchange Wallet',       value: parseFloat(treasury?.exchange_wallet || 0), prefix: '$', decimals: 4, icon: Landmark,   color: '#2563eb', bg: '#eff4ff' },
-            { label: 'Total Trade Volume',    value: totalVolume,                               prefix: '$', decimals: 2, icon: TrendingUp,  color: '#f5a623', bg: '#fff8ed' },
-            { label: 'Fee Rate',              value: 2,                                         prefix: '',  decimals: 2, suffix: '%', icon: Percent, color: '#7c3aed', bg: '#f5f0ff' },
+            { label: 'Total Fees Collected', value: parseFloat(treasury?.total_fees || 0),     format: (n) => formatMoney(n, { decimals: 2 }), icon: DollarSign, color: '#00b87a', bg: '#edfaf4' },
+            { label: 'Exchange Wallet',       value: parseFloat(treasury?.exchange_wallet || 0), format: (n) => formatMoney(n, { decimals: 2 }), icon: Landmark,   color: '#2563eb', bg: '#eff4ff' },
+            { label: 'Total Trade Volume',    value: totalVolume,                                format: (n) => formatMoney(n, { decimals: 2 }), icon: TrendingUp,  color: '#f5a623', bg: '#fff8ed' },
+            { label: 'Fee Rate',              value: 0.5,                                        format: (n) => `${n.toFixed(2)}%`,              icon: Percent,     color: '#7c3aed', bg: '#f5f0ff' },
           ].map((s, i) => (
             <div key={i} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: '0.55rem', color: 'var(--text3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>{s.label}</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: s.color, fontFamily: "'Sora', sans-serif" }}>
-                  <CountUp value={s.value} prefix={s.prefix} decimals={s.decimals} suffix={s.suffix || ''} />
+                <div title={s.format(s.value)} style={{ fontSize: '1.25rem', fontWeight: 800, color: s.color, fontFamily: "'Sora', sans-serif", fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <CountUp value={s.value} format={s.format} />
                 </div>
               </div>
               <div style={{ background: s.bg, padding: '6px', borderRadius: '8px', flexShrink: 0 }}>
@@ -103,12 +104,12 @@ export default function Treasury() {
               <div className="card-title">Treasury Breakdown</div>
             </div>
             {[
-              { label: 'Total Trades Executed',  value: treasury?.total_trades || 0,    color: 'var(--blue)' },
-              { label: 'Total Tasks Attempted',  value: treasury?.total_tasks || 0,     color: 'var(--green)' },
-              { label: 'Avg Fee Per Trade',       value: `$${avgFee.toFixed(4)}`,        color: 'var(--gold)' },
-              { label: 'Total Volume Processed',  value: `$${totalVolume.toFixed(2)}`,   color: 'var(--purple)' },
-              { label: 'Exchange Operating Day',  value: `Day ${treasury?.exchange_day || 1}`, color: 'var(--text)' },
-              { label: 'Revenue Model',           value: '2% on every trade',            color: 'var(--text3)' },
+              { label: 'Total Trades Executed',  value: formatNumber(treasury?.total_trades || 0),                   color: 'var(--blue)' },
+              { label: 'Total Tasks Attempted',  value: formatNumber(treasury?.total_tasks || 0),                    color: 'var(--green)' },
+              { label: 'Avg Fee Per Trade',       value: formatMoney(avgFee, { decimals: 4 }),                       color: 'var(--gold)' },
+              { label: 'Total Volume Processed',  value: formatMoney(totalVolume, { decimals: 2 }),                  color: 'var(--purple)' },
+              { label: 'Exchange Operating Day',  value: `Day ${treasury?.exchange_day || 1}`,                       color: 'var(--text)' },
+              { label: 'Revenue Model',           value: '0.5% on every trade',                                      color: 'var(--text3)' },
             ].map((item, i) => (
               <div key={i} style={{
                 display: 'flex', justifyContent: 'space-between',
@@ -160,9 +161,9 @@ export default function Treasury() {
                           </td>
                           <td style={{ fontWeight: 600, color: 'var(--text)' }}>{trade.buyer_ticker}</td>
                           <td style={{ color: 'var(--text2)' }}>{trade.seller_ticker}</td>
-                          <td style={{ color: 'var(--blue)', fontWeight: 600 }}>${parseFloat(trade.total_cost).toFixed(2)}</td>
-                          <td style={{ color: 'var(--green)', fontWeight: 600 }}>${parseFloat(trade.fee).toFixed(4)}</td>
-                          <td style={{ color: 'var(--text)', fontWeight: 700 }}>${running.toFixed(4)}</td>
+                          <td style={{ color: 'var(--blue)', fontWeight: 600 }}>{formatMoney(parseFloat(trade.total_cost), { decimals: 2 })}</td>
+                          <td style={{ color: 'var(--green)', fontWeight: 600 }}>{formatMoney(parseFloat(trade.fee), { decimals: 4 })}</td>
+                          <td style={{ color: 'var(--text)', fontWeight: 700 }}>{formatMoney(running, { decimals: 4 })}</td>
                         </tr>
                       )
                     })

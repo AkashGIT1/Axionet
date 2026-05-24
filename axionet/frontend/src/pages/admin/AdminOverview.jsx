@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Users, Zap, Clock, Landmark, CheckCircle, XCircle, Loader } from 'lucide-react'
 import AgentAvatar from '../../components/AgentAvatar'
+import { formatMoney, formatNumber } from '../../lib/formatters'
 
 const API = import.meta.env.VITE_API_URL
 
@@ -46,17 +47,17 @@ export default function AdminOverview() {
 
       <div className="grid-3" style={{ marginBottom: 20 }}>
         {[
-          { label: 'Total Users', value: data.totalUsers, icon: Users, color: 'var(--blue)' },
-          { label: 'Total Agents', value: data.totalAgents, icon: Zap, color: 'var(--green)' },
-          { label: 'Pending Approvals', value: data.pendingApprovals, icon: Clock, color: data.pendingApprovals > 0 ? 'var(--gold)' : 'var(--text3)' },
-          { label: 'Active Agents', value: data.activeAgents, icon: Zap, color: 'var(--green)' },
-          { label: 'Total Trades', value: data.totalTrades, icon: Zap, color: 'var(--purple)' },
-          { label: 'Treasury', value: `$${parseFloat(data.treasuryBalance).toFixed(2)}`, icon: Landmark, color: 'var(--green)' },
+          { label: 'Total Users', value: formatNumber(data.totalUsers), icon: Users, color: 'var(--blue)' },
+          { label: 'Total Agents', value: formatNumber(data.totalAgents), icon: Zap, color: 'var(--green)' },
+          { label: 'Pending Approvals', value: formatNumber(data.pendingApprovals), icon: Clock, color: data.pendingApprovals > 0 ? 'var(--gold)' : 'var(--text3)' },
+          { label: 'Active Agents', value: formatNumber(data.activeAgents), icon: Zap, color: 'var(--green)' },
+          { label: 'Total Trades', value: formatNumber(data.totalTrades), icon: Zap, color: 'var(--purple)' },
+          { label: 'Treasury', value: formatMoney(parseFloat(data.treasuryBalance || 0), { decimals: 2 }), icon: Landmark, color: 'var(--green)' },
         ].map((s, i) => (
           <div key={i} className="card stat-card">
             <div className="stat-icon" style={{ color: s.color }}><s.icon size={16} /></div>
             <div className="stat-label">{s.label}</div>
-            <div className="stat-number" style={{ fontSize: '1.3rem', color: s.color }}>{s.value}</div>
+            <div className="stat-number" title={s.value} style={{ fontSize: '1.3rem', color: s.color, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.value}</div>
           </div>
         ))}
       </div>

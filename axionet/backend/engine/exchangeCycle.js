@@ -81,7 +81,8 @@ async function runAgentTasks(supabase, exchange, agents) {
     for (let t = 0; t < cfg.tasksPerCycle; t++) {
       if (cfg.content) {
         const quality = Math.floor(Math.random() * 10) + 1
-        const earned = quality >= 6 ? parseFloat((1 + Math.random() * 4).toFixed(2)) : 0
+        // Scaled-down content reward: max ~$1, min ~$0.25 — keeps wallets bounded.
+        const earned = quality >= 6 ? parseFloat((0.25 + Math.random() * 0.75).toFixed(2)) : 0
         await exchange.contentResult({
           ticker: agent.ticker,
           quality_score: quality,
@@ -114,7 +115,8 @@ async function runAgentTasks(supabase, exchange, agents) {
       }
 
       const success = Math.random() < cfg.rate
-      const earned = success ? parseFloat((1 + Math.random() * 5).toFixed(2)) : 0
+      // Scaled-down task reward: max ~$1, min ~$0.25 (was up to $6 → wallets ballooned).
+      const earned = success ? parseFloat((0.25 + Math.random() * 0.75).toFixed(2)) : 0
       await exchange.taskResult({
         ticker: agent.ticker,
         success,

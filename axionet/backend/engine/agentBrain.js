@@ -83,22 +83,24 @@ function buildMarketScores(agents, socialScores, cryptoContext, posts) {
 
 function personalityWeights(style = '') {
   const s = style.toLowerCase()
+  // FOMO is the runaway multiplier — keep it close to 1 so prices don't snowball
+  // when several agents pile into the same hot ticker on consecutive ticks.
   if (s.includes('aggressive')) {
-    return { greed: 0.5, social: 0.15, crypto: 0.15, momentum: 0.2, fomo: 1.4 }
+    return { greed: 0.5, social: 0.15, crypto: 0.15, momentum: 0.2, fomo: 1.15 }
   }
   if (s.includes('careful') || s.includes('analytical')) {
-    return { greed: 0.25, social: 0.2, crypto: 0.35, momentum: 0.2, fomo: 0.7 }
+    return { greed: 0.25, social: 0.2, crypto: 0.35, momentum: 0.2, fomo: 0.75 }
   }
   if (s.includes('creative')) {
-    return { greed: 0.2, social: 0.35, crypto: 0.25, momentum: 0.2, fomo: 1.0 }
+    return { greed: 0.2, social: 0.35, crypto: 0.25, momentum: 0.2, fomo: 0.95 }
   }
   if (s.includes('fast')) {
-    return { greed: 0.3, social: 0.25, crypto: 0.2, momentum: 0.25, fomo: 1.2 }
+    return { greed: 0.3, social: 0.25, crypto: 0.2, momentum: 0.25, fomo: 1.05 }
   }
   if (s.includes('pure investor')) {
-    return { greed: 0.55, social: 0.05, crypto: 0.1, momentum: 0.3, fomo: 1.3 }
+    return { greed: 0.55, social: 0.05, crypto: 0.1, momentum: 0.3, fomo: 1.1 }
   }
-  return { greed: 0.35, social: 0.2, crypto: 0.2, momentum: 0.25, fomo: 1.0 }
+  return { greed: 0.35, social: 0.2, crypto: 0.2, momentum: 0.25, fomo: 0.95 }
 }
 
 function scoreTargetForBuyer(buyer, target, marketScores, cryptoContext) {
@@ -182,17 +184,10 @@ function buildTradeReason(buyer, target, marketScores, cryptoContext) {
   return `${buyer.ticker} (${style.split(' ')[0] || 'agent'}) targets $${target.ticker} on mixed signals — crypto: ${topCrypto}`
 }
 
-function decideShareCount(buyer, target, marketScores) {
-  const m = marketScores[target.ticker]
-  const wallet = parseFloat(buyer.wallet) || 0
-  const style = (buyer.style || '').toLowerCase()
-  let shares = 1
-
-  if (m?.isHot && (style.includes('aggressive') || style.includes('pure investor')) && wallet > 12) {
-    shares = Math.random() < 0.4 ? 2 : 1
-  }
-  if (wallet < 6) shares = 1
-  return shares
+function decideShareCount(_buyer, _target, _marketScores) {
+  // Forcing single-share trades keeps inter-agent activity steady and prevents
+  // 2-share whale orders from rocketing a price 1%+ in one tick.
+  return 1
 }
 
 function shouldSell(buyer, assetTicker, marketScores) {
@@ -204,12 +199,16 @@ function shouldSell(buyer, assetTicker, marketScores) {
     return { sell: true, reason: `cutting loser $${assetTicker} — bleeding (${m.priceReturn.toFixed(1)}%)` }
   }
   if (m.socialTotal < 2 && m.greedAppeal < 8) {
-    return { sell: true, reason: `social + performance cooled on $${assetTicker}` }
+    return { sell: Math.random() < 0.6, reason: `social + performance cooled on $${assetTicker}` }
   }
   if (m.isHot && style.includes('careful')) {
-    return { sell: Math.random() < 0.5, reason: `taking profit on hot name $${assetTicker}` }
+    return { sell: Math.random() < 0.55, reason: `taking profit on hot name $${assetTicker}` }
   }
-  return { sell: Math.random() < 0.22, reason: `tactical exit on $${assetTicker}` }
+  // Take a profit when sitting on >25% unrealized gains so prices retrace naturally.
+  if (m.priceReturn > 25 && Math.random() < 0.4) {
+    return { sell: true, reason: `locking +${m.priceReturn.toFixed(0)}% gain on $${assetTicker}` }
+  }
+  return { sell: Math.random() < 0.32, reason: `tactical exit on $${assetTicker}` }
 }
 
 module.exports = {

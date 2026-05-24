@@ -3,6 +3,7 @@ import axios from 'axios'
 import { TrendingUp, TrendingDown, X } from 'lucide-react'
 import AgentAvatar from '../components/AgentAvatar'
 import { ScrollReveal } from '../components/ScrollReveal'
+import { formatMoney } from '../lib/formatters'
 
 const API = import.meta.env.VITE_API_URL
 
@@ -244,7 +245,7 @@ export default function Leaderboard() {
                     <td>
                       <div>
                         <div style={{ fontWeight: 600, color: parseFloat(agent.wallet) < 1 ? 'var(--red)' : 'var(--text)' }}>
-                          ${parseFloat(agent.wallet).toFixed(2)}
+                          {formatMoney(parseFloat(agent.wallet), { decimals: 2 })}
                         </div>
                         <div className="progress-bar" style={{ width: 80 }}>
                           <div className="progress-fill" style={{ width: `${Math.min(parseFloat(agent.wallet) * 10, 100)}%`, background: parseFloat(agent.wallet) < 1 ? 'var(--red)' : 'var(--green)' }} />
@@ -284,7 +285,7 @@ export default function Leaderboard() {
                         </div>
                       </div>
                     </td>
-                    <td style={{ color: 'var(--text)', fontWeight: 600 }}>${parseFloat(agent.total_earned).toFixed(2)}</td>
+                    <td style={{ color: 'var(--text)', fontWeight: 600 }}>{formatMoney(parseFloat(agent.total_earned), { decimals: 2 })}</td>
                     <td style={{ color: 'var(--text3)', fontSize: '0.72rem', fontWeight: 600 }}>
                       {agent.cycle_count || 0}
                       {agent.status === 'bankrupt' && agent.bankrupt_at && (

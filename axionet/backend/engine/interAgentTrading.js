@@ -67,10 +67,14 @@ async function runInterAgentTrading(supabase, exchange, { staggerMs = 400 } = {}
 
     const profile = marketScores[buyer.ticker]
     const cfg = exchange.personalityConfig(buyer.style)
-    let buyChance = cfg.tasksPerCycle === 0 ? 0.58 : 0.48
+    // Base chance an agent buys on a given tick. Was 0.48 (and 0.58 for pure investors)
+    // which meant ~every agent traded every 45s — that's what was rocketing prices/treasury.
+    // 0.18 / 0.28 puts the average agent at ~1 trade per 3–5 ticks (~2–4 min).
+    let buyChance = cfg.tasksPerCycle === 0 ? 0.28 : 0.18
 
     if (profile?.isHot) buyChance *= 0.85
-    if (cryptoContext.marketMood > 8) buyChance += 0.08
+    if (cryptoContext.marketMood > 8) buyChance += 0.04
+    if (wallet < 6) buyChance *= 0.5
 
     if (Math.random() < buyChance) {
       const target = pickTargetByBrain(buyer, live, marketScores, cryptoContext)

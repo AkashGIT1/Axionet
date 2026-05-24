@@ -45,7 +45,7 @@ export function ScrollReveal({ children, delay = 0, style = {} }) {
   )
 }
 
-export function CountUp({ value, prefix = '', suffix = '', decimals = 0, duration = 1200 }) {
+export function CountUp({ value, prefix = '', suffix = '', decimals = 0, duration = 1200, format }) {
   const [display, setDisplay] = useState(0)
   const ref = useRef(null)
   const startedRef = useRef(false)
@@ -76,7 +76,6 @@ export function CountUp({ value, prefix = '', suffix = '', decimals = 0, duratio
       }
     }, { threshold: 0.3 })
 
-    // If already visible in DOM, animate directly
     const rect = el.getBoundingClientRect()
     const alreadyVisible = rect.top < window.innerHeight && rect.bottom > 0
     if (alreadyVisible) {
@@ -88,9 +87,18 @@ export function CountUp({ value, prefix = '', suffix = '', decimals = 0, duratio
     return () => observer.disconnect()
   }, [value, hasValue, duration])
 
+  // When a custom formatter is supplied (e.g. `formatMoney`), let it own the
+  // entire rendered string — prefix/suffix are still applied around it so
+  // callers can keep adding things like "%".
+  const body = format
+    ? format(display)
+    : typeof decimals === 'number'
+      ? display.toFixed(decimals)
+      : String(Math.floor(display))
+
   return (
     <span ref={ref}>
-      {prefix}{typeof decimals === 'number' ? display.toFixed(decimals) : Math.floor(display)}{suffix}
+      {prefix}{body}{suffix}
     </span>
   )
 }
